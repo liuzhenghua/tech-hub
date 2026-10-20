@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>本地工具箱 · Local Toolbox</title>
+<style>
+:root{color-scheme:dark;--bg:#101319;--panel:#191e27;--line:#303846;--text:#e7ecf3;--muted:#94a2b7;--accent:#b7ed89}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,-apple-system,sans-serif}main{max-width:1200px;margin:auto;padding:48px 28px}header{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:36px}.eyebrow{font:12px monospace;letter-spacing:3px;color:var(--accent)}h1{font-size:36px;margin:12px 0}p{color:var(--muted);line-height:1.7;margin:0}.badge{border:1px solid var(--line);border-radius:24px;padding:10px 16px;white-space:nowrap;color:var(--accent)}nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}button,select{font:inherit;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:10px 15px;cursor:pointer}button:hover{border-color:var(--accent)}button:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:3px}nav button[aria-selected=true]{background:var(--accent);color:#152016;border-color:var(--accent)}.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}.toolbar span{margin-left:auto;color:var(--muted);font-size:13px}.editors{display:grid;grid-template-columns:1fr 1fr;gap:20px}.editor{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}.editor-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}.editor-head button{font-size:12px;padding:6px 10px}textarea{display:block;width:100%;min-height:360px;resize:vertical;background:transparent;color:var(--text);border:0;padding:20px;font:14px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:2}textarea::placeholder{color:#69788e}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}.primary{background:var(--accent);color:#152016;border-color:var(--accent);font-weight:650}#status{min-height:28px;margin-top:18px;font-size:14px;color:var(--accent)}#status.error{color:#ffadad}footer{border-top:1px solid var(--line);margin-top:26px;padding-top:20px;color:var(--muted);font-size:13px}@media(max-width:700px){main{padding:28px 16px}header{align-items:flex-start}.badge{display:none}h1{font-size:30px}.editors{grid-template-columns:1fr}textarea{min-height:240px}.toolbar span{margin-left:0}}
+
+.bottom-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:12px}.bottom-toolbar .toolbar{display:contents}.bottom-toolbar #hint{order:3;margin-left:auto}.bottom-toolbar .actions{align-items:center}
+@media(max-width:700px){.bottom-toolbar #hint{width:100%;margin-left:0}}
+#jwt-key-row{display:flex;align-items:flex-start;gap:12px;flex-shrink:0}#jwt-key-row label{white-space:nowrap;font-size:12px;padding-top:10px}#jwt-key{flex:1 1 0;min-width:0;height:60px;min-height:60px;max-height:40dvh;resize:vertical;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:13px;line-height:1.7}
+#jwt-info{font:12px/1.6 ui-monospace,monospace;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere;max-height:100px;overflow:auto}
+#markdown-preview{flex:1;width:100%;min-height:0;border:0;background:var(--panel)}
+/* Compact workspace: editor panes receive the remaining viewport height. */
+main{max-width:none;padding:14px 20px;min-height:100dvh;display:flex;flex-direction:column;gap:10px}
+header{margin:0;gap:12px}header>div:first-child{display:flex;align-items:center;gap:16px}.eyebrow{display:none}h1{font-size:20px;margin:0}header p{font-size:12px}.badge{font-size:12px;padding:5px 10px}
+nav{margin:0;gap:6px}button,select{padding:7px 12px;font-size:13px}.toolbar{margin:0;gap:10px}.toolbar span{font-size:12px}
+.editors{flex:1;gap:12px;min-height:360px}.editor{display:flex;flex-direction:column;min-width:0;border-radius:10px}.editor-head{padding:8px 12px;gap:8px;flex-wrap:wrap}.editor-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+textarea{flex:1;min-height:0;resize:none;padding:12px;height:100%;font-size:14px}.actions{margin:0}#status{margin:0;min-height:18px;font-size:12px}footer{margin:0;padding:6px 0 0;font-size:11px}
+[hidden]{display:none!important}.json-tree{flex:1;overflow:auto;padding:12px;font:14px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}.json-tree summary{cursor:pointer;border-radius:4px}.json-tree summary:hover{background:#263040}.json-children{margin-left:9px;padding-left:15px;border-left:1px solid var(--line)}.json-key{color:#a9cef8}.json-string{color:#b7ed89;white-space:pre-wrap}.json-number{color:#eac28b}.json-boolean{color:#c6a4f2}.json-null,.json-meta{color:var(--muted)}
+@media(min-width:701px){main{height:100dvh;min-height:600px}.editors{min-height:0}}
+@media(max-width:700px){main{padding:10px;gap:8px}header>div:first-child{display:block}header p{display:none}h1{font-size:18px}.editors{grid-template-columns:1fr}.editor{min-height:300px}.toolbar span{width:100%;margin:0}textarea{min-height:240px}}
+
+:root{--link:#a9cef8;--code-bg:#101319;--table-head:#242c38;--error:#ffadad}
+:root[data-theme=light]{color-scheme:light;--bg:#f3f5f8;--panel:#fff;--line:#d5dce5;--text:#202b3a;--muted:#5c6c80;--accent:#367523;--link:#245b9e;--code-bg:#edf1f6;--table-head:#e8edf4;--error:#b42318}
+.header-controls{display:flex;align-items:center;gap:10px}.theme-label{font-size:12px;color:var(--muted)}#status.error{color:var(--error)}
+:root[data-theme=light] nav button[aria-selected=true],:root[data-theme=light] .primary{color:#fff}
+:root[data-theme=light] .json-key{color:#245b9e}:root[data-theme=light] .json-string{color:#367523}:root[data-theme=light] .json-number{color:#9b5814}:root[data-theme=light] .json-boolean{color:#7949a3}:root[data-theme=light] .json-tree summary:hover{background:#edf1f6}
+@media(max-width:700px){.header-controls{gap:6px}.theme-label{display:none}}
+.aes-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.aes-controls label{font-size:12px;display:flex;align-items:center;gap:6px}input{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px;min-width:220px}
+#rsa-key{height:80px;min-height:80px;flex:none;resize:vertical;border:1px solid var(--line);border-radius:6px}#rsa-controls{font-size:12px}
+</style>
+</head>
+<body><main>
+<header><div><div class="eyebrow">LOCAL / DEVELOPER UTILITIES</div><h1>本地工具箱</h1><p>粘贴文本，立即转换。数据只在当前浏览器中处理。</p></div><div class="header-controls"><div class="badge">● 完全离线 · 无需安装</div><label class="theme-label" for="theme">主题</label><select id="theme" aria-label="页面主题"><option value="dark">暗色</option><option value="light">亮色</option></select></div></header>
+<nav aria-label="工具选择" role="tablist"></nav>
+<div class="editors"><section class="editor"><div class="editor-head"><label for="input">输入 <small id="count"></small></label><div class="editor-controls"><button id="input-wrap" aria-pressed="true" title="切换输入区自动换行">Word wrap：开</button><button id="clear">清空</button></div></div><textarea id="input" wrap="soft" spellcheck="false" placeholder="在这里粘贴需要处理的文本…"></textarea></section><section class="editor"><div class="editor-head"><label for="output">输出</label><div class="editor-controls"><button id="markdown-toggle" hidden>HTML 源码</button><div id="json-controls" hidden><button id="tree-toggle" aria-pressed="true">文本视图</button> <button id="expand-all">全部展开</button> <button id="collapse-all">全部折叠</button></div><button id="copy">复制结果</button></div></div><textarea id="output" readonly spellcheck="false" placeholder="处理结果会出现在这里"></textarea><iframe id="markdown-preview" sandbox="" title="Markdown 预览" hidden></iframe><div id="json-tree" class="json-tree" aria-label="JSON 树形结果" hidden></div></section></div>
+<div id="sm2-controls" hidden><label>SM2 密钥（Hex） <input id="sm2-key" placeholder="加密填公钥，解密填私钥"></label><label>密文编码 <select id="sm2-format"><option>Hex</option><option>Base64</option></select></label><label>密文 C1 前缀 <select id="sm2-prefix"><option value="yes">含 04</option><option value="no">不含 04</option></select></label></div><div id="rsa-controls" hidden><label for="rsa-key">RSA 密钥（本地保存）</label><textarea id="rsa-key" rows="3" autocomplete="off" spellcheck="false" placeholder="加密：BEGIN PUBLIC KEY 公钥或公钥 JWK；解密：BEGIN PRIVATE KEY 私钥或私钥 JWK"></textarea><label for="rsa-format">密文编码</label> <select id="rsa-format"><option>Base64</option><option>Hex</option></select></div><div id="aes-controls" hidden class="aes-controls"><label>密钥编码 <select id="aes-key-format"><option>Hex</option><option>Base64</option><option>UTF-8</option></select></label><label>密钥 <input id="aes-key" autocomplete="off" placeholder="16 / 24 / 32 字节原始密钥"></label><button id="aes-generate-key">生成 256 位密钥</button><label>IV（Hex） <input id="aes-iv" autocomplete="off"></label><button id="aes-generate-iv">生成 IV</button><label>密文编码 <select id="aes-format"><option>Base64</option><option>Hex</option></select></label></div><div id="jwt-info" hidden aria-live="polite"></div><div id="jwt-key-row" hidden><label for="jwt-key">校验密钥（可选）</label><textarea id="jwt-key" rows="2" wrap="soft" spellcheck="false" autocomplete="off" placeholder="HS：原始文本密钥；RS / PS / ES：PEM 公钥（BEGIN PUBLIC KEY）或公钥 JWK"></textarea></div><div class="bottom-toolbar"><div class="toolbar"><label for="option" id="option-label">算法</label><select id="option"></select><select id="crypto-variant" aria-label="算法模式" hidden></select><span id="hint"></span></div><div class="actions" id="actions"></div></div><div id="status" role="status" aria-live="polite"></div>
+<footer><span id="storage-note">内容自动保存在本机</span> · UTF-8 文本处理 · 不上传 · MD5 / SHA-1 适用于校验，不适用于密码存储。JSON 解析遵循 JavaScript 数值精度。</footer>
+</main>
+<script src="./vendor/marked.umd.js"></script>
+<script src="./vendor/forge.min.js"></script>
+<script src="./vendor/sm-crypto.bundle.js"></script>
+<script src="./vendor/crypto-js.js"></script>
+<script src="./vendor/purify.min.js"></script>
+<script src="./vendor/mermaid.bundle.js"></script>
+<script>
+'use strict';
+const $=id=>document.getElementById(id), encoder=new TextEncoder();
+const decoder=new TextDecoder('utf-8',{fatal:true});
+let theme='dark';try{const saved=localStorage.getItem('text-toolbox-theme');if(saved==='light'||saved==='dark')theme=saved}catch{}
+document.documentElement.dataset.theme=theme;$('theme').value=theme;
+
+function md5(bytes){
+ const size=Math.ceil((bytes.length+9)/64)*64, buffer=new Uint8Array(size);buffer.set(bytes);buffer[bytes.length]=128;
+ const view=new DataView(buffer.buffer), bits=BigInt(bytes.length)*8n;view.setUint32(size-8,Number(bits&0xffffffffn),true);view.setUint32(size-4,Number(bits>>32n),true);
+ const shifts=[7,12,17,22,5,9,14,20,4,11,16,23,6,10,15,21];const constants=Array.from({length:64},(_,i)=>Math.floor(Math.abs(Math.sin(i+1))*2**32)|0);
+ let state=[0x67452301,0xefcdab89,0x98badcfe,0x10325476];
+ for(let offset=0;offset<size;offset+=64){let [a,b,c,d]=state;for(let i=0;i<64;i++){let f,g;if(i<16){f=(b&c)|(~b&d);g=i}else if(i<32){f=(d&b)|(~d&c);g=(5*i+1)%16}else if(i<48){f=b^c^d;g=(3*i+5)%16}else{f=c^(b|~d);g=7*i%16}const x=(a+f+constants[i]+view.getInt32(offset+g*4,true))|0,s=shifts[Math.floor(i/16)*4+i%4];a=d;d=c;c=b;b=(b+((x<<s)|(x>>>(32-s))))|0}state=state.map((v,i)=>(v+[a,b,c,d][i])|0)}
+ return state.map(v=>Array.from({length:4},(_,i)=>((v>>>(i*8))&255).toString(16).padStart(2,'0')).join('')).join('');
+}
+function fromBase64(value){let normalized=value.replace(/\s/g,'');if(!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}(?:==)?|[A-Za-z0-9+/]{3}=?|)?$/.test(normalized))throw new Error('Base64 格式无效，请输入标准 Base64 字符串。');return Uint8Array.from(atob(normalized),c=>c.charCodeAt(0))}
+const configs={
+ json:{name:'JSON',label:'缩进',options:['2 个空格','4 个空格','Tab'],hint:'格式化或移除 JSON 中的多余空白',actions:[['格式化','format'],['修复并格式化','repair'],['压缩 JSON','minify']]},
+ jwt:{name:'JWT',label:'算法',options:[],hint:'自动读取 Header.alg；解析无需密钥。签名校验不检查有效期或签发者。',actions:[['解析','parse'],['校验签名','verify']]},
+ strings:{name:'字符串处理',label:'',options:[],hint:'转义不加外层引号；反转义自动去除外层双引号；与 CotEditor 三个字符串脚本一致',actions:[['escape_string','escape'],['unescape_string','unescape'],['single_to_double_quotes','quotes']]},
+ markdown:{name:'Markdown',label:'',options:[],hint:'实时预览 · 支持 Mermaid、表格和任务列表 · 可切换 HTML 源码',actions:[['渲染','render']]},
+ hash:{name:'密码工具',label:'算法',options:['AES','SHA','MD5','Base64','RSA','HMAC','国密','DES'],hint:'按原始 UTF-8 字节计算，保留空格和换行',actions:[['计算 Hash','hash']]},
+};
+let current=null,revision=0,busy=false,treeMode=true;
+const toolStates=new Map();
+let markdownSource=false;
+function updateView(){const available=current==='json'&&$('output').value!=='';$('json-controls').hidden=!available;$('json-tree').hidden=!(available&&treeMode);$('output').hidden=(available&&treeMode)||(current==='markdown'&&!markdownSource);$('markdown-preview').hidden=current!=='markdown'||markdownSource;$('markdown-toggle').hidden=current!=='markdown';$('markdown-toggle').textContent=markdownSource?'预览':'HTML 源码';$('copy').textContent=current==='markdown'?(markdownSource?'复制 HTML':'复制富文本'):'复制结果';$('tree-toggle').textContent=treeMode?'文本视图':'树形视图';$('tree-toggle').setAttribute('aria-pressed',String(treeMode));$('expand-all').disabled=!treeMode;$('collapse-all').disabled=!treeMode}
+function clearResult(){$('jwt-info').textContent='';$('jwt-info').hidden=true;$('output').value='';$('json-tree').replaceChildren();updateView()}
+function renderJSON(value){
+ const root=$('json-tree');root.replaceChildren();
+ function node(key,value,depth){
+  const container=value!==null&&typeof value==='object',element=document.createElement(container?'details':'div');
+  const line=container?document.createElement('summary'):element;
+  if(key!==null){const label=document.createElement('span');label.className='json-key';label.textContent=key+': ';line.append(label)}
+  if(container){const array=Array.isArray(value),entries=Object.entries(value),meta=document.createElement('span');meta.className='json-meta';meta.textContent=(array?'Array':'Object')+' '+(array?'[':'{')+entries.length+(array?']':'}');line.append(meta);element.append(line);element.open=depth<2;
+   const children=document.createElement('div');children.className='json-children';let built=false;
+   function build(){if(built)return;built=true;for(const [k,v] of entries)children.append(node(array?k:JSON.stringify(k),v,depth+1));element.append(children)}
+   element.addEventListener('toggle',()=>{if(element.open)build()});element.buildChildren=build;if(element.open)build();
+  }else{const text=document.createElement('span');text.className='json-'+(value===null?'null':typeof value);text.textContent=JSON.stringify(value);line.append(text)}
+  return element;
+ }
+ root.append(node(null,value,0));updateView();
+}
+$('tree-toggle').onclick=()=>{treeMode=!treeMode;updateView()};
+$('expand-all').onclick=()=>{const expand=element=>{if(element.tagName==='DETAILS'){element.buildChildren();element.open=true}for(const child of element.children)expand(child)};expand($('json-tree'))};
+$('collapse-all').onclick=()=>{$('json-tree').querySelectorAll('details').forEach(element=>element.open=false)};
+
+function status(message,error=false){$('status').textContent=message;$('status').className=error?'error':''}
+function captureToolState(){return {cryptoVariant:$('crypto-variant').value,markdownSource,info:$('jwt-info').textContent,input:$('input').value,output:$('output').value,option:$('option').value,treeMode,wrap:$('input-wrap').getAttribute('aria-pressed')==='true',message:busy?'':$('status').textContent,error:$('status').className==='error',tree:$('json-tree').firstChild,inputScroll:[$('input').scrollTop,$('input').scrollLeft],outputScroll:[$('output').scrollTop,$('output').scrollLeft]}}
+const savedParameterIds=['jwt-key','aes-key','aes-iv','aes-key-format','aes-format','rsa-key','rsa-format','sm2-key','sm2-format','sm2-prefix'];
+function saveToolContent(){
+ if(current===null)return;
+ toolStates.set(current,captureToolState());
+ const states={};for(const [key,state] of toolStates){const {tree,...stored}=state;states[key]=stored}
+ states._cryptoGroupsVersion=2;states._parameters=Object.fromEntries(savedParameterIds.map(id=>[id,$(id).value]));
+ try{localStorage.setItem('text-toolbox-content',JSON.stringify(states));$('storage-note').textContent='内容自动保存在本机'}
+ catch{$('storage-note').textContent='本地保存失败（可能空间不足），请复制重要内容'}
+}
+try{
+ const saved=JSON.parse(localStorage.getItem('text-toolbox-content')||'{}');if(saved&&!saved._cryptoGroupsVersion&&saved.hash){const old=Number(saved.hash.option);if([6,7,8].includes(old)){saved.hash.option='6';if(old===7)saved.hash.cryptoVariant='SM3'}else if([9,10].includes(old))saved.hash.option='7'}for(const id of savedParameterIds){const value=saved?._parameters?.[id];if(typeof value==='string'&&($(id).tagName!=='SELECT'||Array.from($(id).options).some(option=>option.value===value)))$(id).value=value}if(saved?.hash&&!saved.hash.cryptoVariant){const old=['MD5','SHA-1','SHA-256','SHA-384','SHA-512','AES-GCM','AES-CBC','AES-CTR'][Number(saved.hash.option)];if(old){saved.hash.option=old==='MD5'?'2':old.startsWith('SHA')?'1':'0';saved.hash.cryptoVariant=old}}
+ for(const key of Object.keys(configs)){const state=saved?.[key];if(state&&typeof state.input==='string'&&typeof state.output==='string')toolStates.set(key,{...state,inputScroll:Array.isArray(state.inputScroll)?state.inputScroll:[0,0],outputScroll:Array.isArray(state.outputScroll)?state.outputScroll:[0,0]})}
+}catch{}
+let saveTimer;document.addEventListener('input',event=>{clearTimeout(saveTimer);saveTimer=setTimeout(saveToolContent,250)});
+document.addEventListener('click',()=>{clearTimeout(saveTimer);saveTimer=setTimeout(saveToolContent,250)});
+document.addEventListener('change',()=>{clearTimeout(saveTimer);saveTimer=setTimeout(saveToolContent,250)});
+window.addEventListener('pagehide',saveToolContent);
+function selectTool(key){
+ if(!Object.hasOwn(configs,key))return;
+ try{localStorage.setItem('text-toolbox-tab',key)}catch{}
+ if(current===key)return;
+ saveToolContent();
+ current=key;revision++;$('jwt-key-row').hidden=key!=='jwt';$('option-label').hidden=key==='jwt'||key==='strings'||key==='markdown';$('option').hidden=key==='jwt'||key==='strings'||key==='markdown';const cfg=configs[key];document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.key===key)));$('option-label').textContent=cfg.label;$('option').replaceChildren(...cfg.options.map((s,i)=>new Option(s,String(i))));$('hint').textContent=cfg.hint;$('actions').replaceChildren(...cfg.actions.map(([name,action],i)=>{const button=document.createElement('button');button.textContent=name;button.className=i===0?'primary':'';button.onclick=()=>run(action);button.disabled=busy;return button}));if(typeof reuse!=='undefined')$('actions').append(reuse);const saved=toolStates.get(key);$('jwt-info').textContent=saved?.info??'';$('jwt-info').hidden=key!=='jwt'||!saved?.info;
+ $('input').value=saved?.input??'';$('output').value=saved?.output??'';$('option').value=saved?.option??'0';treeMode=saved?.treeMode??true;markdownSource=saved?.markdownSource??false;
+ const wrap=saved?.wrap??true;$('input-wrap').setAttribute('aria-pressed',String(wrap));$('input-wrap').textContent='Word wrap：'+(wrap?'开':'关');$('input').wrap=wrap?'soft':'off';$('input').style.whiteSpace=wrap?'pre-wrap':'pre';$('input').style.overflowWrap=wrap?'anywhere':'normal';
+ $('count').textContent=`· ${encoder.encode($('input').value).length.toLocaleString()} 字节`;
+ $('json-tree').replaceChildren();if(key==='json'&&saved?.tree)$('json-tree').append(saved.tree);else if(key==='json'&&saved?.output){try{renderJSON(JSON.parse(saved.output))}catch{clearResult()}}updateView();
+ $('input').scrollTop=saved?.inputScroll[0]??0;$('input').scrollLeft=saved?.inputScroll[1]??0;$('output').scrollTop=saved?.outputScroll[0]??0;$('output').scrollLeft=saved?.outputScroll[1]??0;
+ updateCryptoControls(saved?.cryptoVariant);if(key==='markdown')renderMarkdown();status(saved?.message??'',saved?.error??false);
+}
+for(const [key,cfg] of Object.entries(configs)){const button=document.createElement('button');button.textContent=cfg.name;button.dataset.key=key;button.setAttribute('role','tab');button.setAttribute('aria-controls','actions');button.onclick=()=>selectTool(key);document.querySelector('nav').append(button)}
+async function verifyJWT(parts,header,keyMaterial){
+ const expected=header.alg;
+ if(typeof expected!=='string'||!/^(?:HS|RS|PS|ES)(?:256|384|512)$/.test(expected))throw new Error('不支持的签名算法：'+String(expected));
+ if(!globalThis.crypto?.subtle)throw new Error('当前环境不支持 Web Crypto，请使用现代浏览器。');
+ if(header.crit!==undefined||header.b64===false)throw new Error('不支持含 crit 或未编码 Payload 的 JWT。');
+ if(!parts[2])throw new Error('Token 没有签名。');
+ if(!keyMaterial)throw new Error('请填写校验密钥。');
+ const family=expected.slice(0,2),bits=Number(expected.slice(2)),hash='SHA-'+bits;
+ const name=family==='HS'?'HMAC':family==='RS'?'RSASSA-PKCS1-v1_5':family==='PS'?'RSA-PSS':family==='ES'?'ECDSA':null;
+ if(!name)throw new Error('不支持该签名算法。');
+ const algorithm=name==='ECDSA'?{name,namedCurve:({256:'P-256',384:'P-384',512:'P-521'})[bits]}:{name,hash};
+ let format,material;
+ if(family==='HS'){
+  if(/-----BEGIN/.test(keyMaterial))throw new Error('HMAC 需要原始文本密钥，不能使用 PEM 公钥。');
+  format='raw';material=encoder.encode(keyMaterial);
+ }else{
+  const trimmed=keyMaterial.trim();
+  if(trimmed.startsWith('{')){format='jwk';material=JSON.parse(trimmed);if(material.d||material.k||material.kty!==(family==='ES'?'EC':'RSA'))throw new Error('请提供匹配算法的公钥 JWK。');if(material.alg&&material.alg!==expected)throw new Error('JWK 算法不匹配。')}
+  else{const match=trimmed.match(/^-----BEGIN PUBLIC KEY-----\s*([A-Za-z0-9+/=\s]+)\s*-----END PUBLIC KEY-----$/);if(!match)throw new Error('请提供 BEGIN PUBLIC KEY 格式的 PEM 公钥或公钥 JWK。');format='spki';material=fromBase64(match[1])}
+ }
+ const key=await crypto.subtle.importKey(format,material,algorithm,false,['verify']);
+ const verification=name==='ECDSA'?{name,hash}:name==='RSA-PSS'?{name,saltLength:bits/8}:{name};
+ const signature=fromBase64(parts[2].replace(/-/g,'+').replace(/_/g,'/'));
+ return crypto.subtle.verify(verification,key,signature,encoder.encode(parts[0]+'.'+parts[1]));
+}
+let mermaidSequence=0,markdownRenderSequence=0;
+mermaid.initialize({startOnLoad:false,securityLevel:'strict',htmlLabels:false,theme:theme==='light'?'default':'dark',flowchart:{htmlLabels:false},suppressErrorRendering:true});
+async function markdownHTML(value){
+ const html=DOMPurify.sanitize(marked.parse(value,{gfm:true}),{USE_PROFILES:{html:true},FORBID_TAGS:['style','form','iframe'],FORBID_ATTR:['style']});
+ const fragment=document.createElement('div');fragment.innerHTML=html;
+ for(const code of fragment.querySelectorAll('pre > code.language-mermaid')){
+  const container=document.createElement('div');container.style.cssText='position:fixed;left:-100000px;top:0;width:1200px';document.body.append(container);
+  try{
+   const {svg}=await mermaid.render('toolbox-mermaid-'+(++mermaidSequence),code.textContent,container);
+   const clean=DOMPurify.sanitize(svg,{USE_PROFILES:{svg:true,svgFilters:true},FORBID_TAGS:['foreignObject']});
+   const image=document.createElement('img');image.alt='Mermaid 图表';image.src='data:image/svg+xml;base64,'+btoa(Array.from(encoder.encode(clean),byte=>String.fromCharCode(byte)).join(''));code.parentElement.replaceWith(image);
+  }catch(error){const message=document.createElement('p');message.textContent='Mermaid 渲染失败：'+error.message;code.parentElement.after(message)}
+  finally{container.remove()}
+ }
+ return fragment.innerHTML;
+}
+async function renderMarkdown(){
+ const token=revision,sequence=++markdownRenderSequence;
+ try{const html=await markdownHTML($('input').value);if(current!=='markdown'||token!==revision||sequence!==markdownRenderSequence)return;paintMarkdown(html)}
+ catch(error){if(current==='markdown'&&token===revision)status('渲染失败：'+error.message,true)}
+}
+function paintMarkdown(html){
+ $('output').value=html;saveToolContent();
+ $('markdown-preview').srcdoc=`<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"><style>:root{${['bg','panel','line','text','muted','accent','link','code-bg','table-head'].map(name=>`--${name}:${getComputedStyle(document.documentElement).getPropertyValue('--'+name)};`).join('')}color-scheme:${theme}}body{color:var(--text);background:var(--panel);font:15px/1.75 system-ui;margin:0;padding:20px;overflow-wrap:anywhere}h1,h2,h3{line-height:1.3;margin:1em 0 .5em}h1{font-size:28px}h2{font-size:23px;border-bottom:1px solid var(--line);padding-bottom:8px}p{margin:.7em 0}a{color:var(--link)}pre{background:var(--code-bg);border:1px solid var(--line);padding:12px;border-radius:8px;overflow:auto}code{font:13px/1.6 monospace;background:var(--code-bg);padding:2px 4px;border-radius:4px}pre code{padding:0}blockquote{margin:12px 0;border-left:3px solid var(--accent);padding:0 16px;color:var(--muted)}table{border-collapse:collapse;display:block;overflow:auto}th,td{border:1px solid var(--line);padding:6px 12px}th{background:var(--table-head)}img{max-width:100%}hr{border:0;border-top:1px solid var(--line)}
+:root{--link:var(--link);--code-bg:var(--code-bg);--table-head:var(--table-head);--error:#ffadad}
+:root[data-theme=light]{color-scheme:light;--bg:#f3f5f8;--panel:#fff;--line:#d5dce5;--text:#202b3a;--muted:#5c6c80;--accent:#367523;--link:#245b9e;--code-bg:#edf1f6;--table-head:#e8edf4;--error:#b42318}
+.header-controls{display:flex;align-items:center;gap:10px}.theme-label{font-size:12px;color:var(--muted)}#status.error{color:var(--error)}
+:root[data-theme=light] nav button[aria-selected=true],:root[data-theme=light] .primary{color:#fff}
+:root[data-theme=light] .json-key{color:#245b9e}:root[data-theme=light] .json-string{color:#367523}:root[data-theme=light] .json-number{color:#9b5814}:root[data-theme=light] .json-boolean{color:#7949a3}:root[data-theme=light] .json-tree summary:hover{background:#edf1f6}
+@media(max-width:700px){.header-controls{gap:6px}.theme-label{display:none}}
+.aes-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.aes-controls label{font-size:12px;display:flex;align-items:center;gap:6px}input{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px;min-width:220px}
+#rsa-key{height:80px;min-height:80px;flex:none;resize:vertical;border:1px solid var(--line);border-radius:6px}#rsa-controls{font-size:12px}
+</style></head><body>${html}</body></html>`;
+ updateView();
+}
+$('markdown-toggle').onclick=()=>{markdownSource=!markdownSource;updateView()};
+// Heuristic repair adapted from cot-editor/json_format.py.
+function repairJSONStrings(text){
+ const controls={'\n':'\\n','\r':'\\r','\t':'\\t','\b':'\\b','\f':'\\f'};
+ const valid='"\\/bfnrt',end=':,}]';let result='',i=0;
+ while(i<text.length){
+  if(text[i]!=='"'){result+=text[i++];continue}
+  result+='"';i++;
+  while(i<text.length){
+   const ch=text[i];
+   if(ch==='\\'){
+    i++;
+    if(i<text.length){const next=text[i];
+     if(next==='u'&&i+4<text.length){result+='\\u'+text.slice(i+1,i+5);i+=5}
+     else if(valid.includes(next)){result+='\\'+next;i++}
+     else{result+='\\\\'+next;i++}
+    }else result+='\\\\';
+    continue;
+   }
+   if(ch==='"'){
+    let j=i+1;while(j<text.length&&' \t\n\r'.includes(text[j]))j++;
+    if(j>=text.length||end.includes(text[j])){result+='"';i++;break}
+    result+='\\"';i++;continue;
+   }
+   result+=controls[ch]??(ch.charCodeAt(0)<32?'\\u'+ch.charCodeAt(0).toString(16).padStart(4,'0'):ch);i++;
+  }
+ }
+ return result;
+}
+// Keep behavior aligned with tools/macos/cot-editor string scripts.
+function escapeString(value){return value.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n').replace(/\t/g,'\\t')}
+function unescapeString(value){
+ if(value.length>=2&&value.startsWith('"')&&value.endsWith('"'))value=value.slice(1,-1);
+ const replacements={'\\n':'\n','\\t':'\t','\\"':'"','\\\\':'\\'};
+ return value.replace(/\\[nt"\\]/g,match=>replacements[match]);
+}
+function singleToDoubleQuotes(value){
+ let output='',i=0;
+ while(i<value.length){
+  if(value[i]!=="'"){output+=value[i++];continue}
+  let j=i+1;
+  while(j<value.length){if(value[j]==='\\'&&j+1<value.length){j+=2;continue}if(value[j]==="'")break;j++}
+  let inner=value.slice(i+1,j);
+  inner=inner.replace(/\\"/g,'\x00').replace(/"/g,'\\"').replace(/\x00/g,'\\"');
+  inner=inner.replace(/\\\\'/g,'\\\\').replace(/\\'/g,"'");
+  output+='"'+inner+'"';i=j+1;
+ }
+ return output;
+}
+function encodeBytes(bytes,format){if(format==='Hex')return Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');let text='';for(let i=0;i<bytes.length;i+=32768)text+=String.fromCharCode(...bytes.subarray(i,i+32768));return btoa(text)}
+function decodeBytes(value,format){if(format==='UTF-8')return encoder.encode(value);if(format==='Base64')return fromBase64(value);const hex=value.replace(/\s/g,'');if(hex.length%2||!/^[0-9a-f]*$/i.test(hex))throw new Error('Hex 格式无效。');return Uint8Array.from(hex.match(/../g)??[],v=>parseInt(v,16))}
+function selectedCryptoAlgorithm(){const family=configs.hash.options[$('option').value];return ['AES','SHA','RSA','HMAC','国密','DES'].includes(family)?$('crypto-variant').value:family}
+function updateCryptoControls(savedVariant){
+ const group=current==='hash'?configs.hash.options[$('option').value]:null;
+ let family=group;
+ const variants=family==='AES'?['AES-GCM','AES-CBC','AES-CTR','AES-ECB']:family==='SHA'?['SHA-256','SHA-384','SHA-512','SHA-1']:family==='RSA'?['RSA-OAEP-SHA-256','RSA-OAEP-SHA-1','RSA-OAEP-SHA-384','RSA-OAEP-SHA-512','RSA-PKCS1-v1_5']:family==='HMAC'?['HMAC-SHA-256','HMAC-SHA-512','HMAC-SHA-384','HMAC-SHA-1','HMAC-MD5','HMAC-SM3']:group==='国密'?['SM4-CBC','SM4-ECB','SM2-C1C3C2','SM2-C1C2C3','SM3']:group==='DES'?['3DES-CBC','3DES-ECB','DES-CBC','DES-ECB']:[];
+ const previous=savedVariant??$('crypto-variant').value;$('crypto-variant').replaceChildren(...variants.map(v=>new Option(v,v)));if(variants.includes(previous))$('crypto-variant').value=previous;
+ $('crypto-variant').hidden=variants.length===0;const name=selectedCryptoAlgorithm();if(group==='国密'||group==='DES')family=name?.split('-')[0];const aes=current==='hash'&&['AES','HMAC','SM4','DES','3DES'].includes(family);$('aes-controls').hidden=!aes;const ecb=aes&&(name?.endsWith('-ECB')||family==='HMAC');$('sm2-controls').hidden=current!=='hash'||family!=='SM2';$('aes-iv').parentElement.hidden=ecb;$('aes-generate-iv').hidden=ecb;$('rsa-controls').hidden=current!=='hash'||family!=='RSA';
+ if(current!=='hash')return;
+ const keyBits=({SM4:128,DES:64,'3DES':192})[family]??256;$('aes-generate-key').textContent='生成 '+keyBits+' 位密钥';$('aes-key').placeholder=family==='HMAC'?'任意非空密钥':family==='SM4'?'16 字节密钥':family==='DES'?'8 字节密钥':family==='3DES'?'16 / 24 字节密钥':'16 / 24 / 32 字节原始密钥';$('rsa-key').placeholder=name==='RSA-PKCS1-v1_5'?'RSA PEM 或 JWK 公钥加密、私钥解密（支持 PKCS#1）':'加密：BEGIN PUBLIC KEY 公钥或公钥 JWK；解密：BEGIN PRIVATE KEY 私钥或私钥 JWK';
+ const actions=family==='HMAC'?[['计算 HMAC','hash']]:aes||['RSA','SM2'].includes(family)?[['加密','encrypt'],['解密','decrypt']]:family==='Base64'?[['编码','encode'],['解码','decode']]:[['计算 Hash','hash']];$('actions').replaceChildren(...actions.map(([label,action],i)=>{const b=document.createElement('button');b.textContent=label;b.className=i===0?'primary':'';b.disabled=busy;b.onclick=()=>run(action);return b}),reuse);
+ $('hint').textContent=family==='HMAC'?'HMAC：使用密钥计算消息认证码，输出编码由密文编码选项指定':family==='SM2'?'SM2：Hex 公钥 / 私钥；支持 C1C3C2、C1C2C3 和 04 前缀选项':family==='SM3'?'SM3：UTF-8 文本摘要，输出 Hex':['SM4','DES','3DES'].includes(family)?`${name}：PKCS#7 填充；SM4 密钥 / CBC IV 16 字节，DES 密钥 / IV 8 字节，3DES 密钥 16 / 24 字节、IV 8 字节`:family==='RSA'?(name==='RSA-PKCS1-v1_5'?'RSA PKCS#1 v1.5：兼容 Java RSA/ECB/PKCS1Padding，仅用于旧系统互通':'RSA-OAEP：公钥加密 / 私钥解密；仅适合短文本，长度上限取决于密钥和 Hash'):family==='Base64'?'UTF-8 文本与标准 Base64 编解码':!aes?configs.hash.hint:name==='AES-ECB'?'ECB：兼容 Java AES/ECB/PKCS5Padding，无需 IV；用于旧系统互通':name==='AES-GCM'?'GCM：12 字节 IV；密文末尾含 16 字节 Tag；同一密钥不要重复使用 IV':name==='AES-CBC'?'CBC：16 字节 IV，PKCS#7 填充；不提供完整性校验':'CTR：16 字节 Counter，计数器长度 64 位；同一密钥不要重复使用 Counter';
+}
+$('crypto-variant').onchange=()=>{revision++;clearResult();updateCryptoControls();status('')};
+$('aes-generate-key').onclick=()=>{$('aes-key-format').value='Hex';$('aes-key').value=encodeBytes(crypto.getRandomValues(new Uint8Array(({SM4:16,DES:8,'3DES':24})[selectedCryptoAlgorithm()?.split('-')[0]]??32)),'Hex');revision++;status('已生成密钥，将保存到本机')};
+$('aes-generate-iv').onclick=()=>{$('aes-iv').value=encodeBytes(crypto.getRandomValues(new Uint8Array(selectedCryptoAlgorithm()==='AES-GCM'?12:['DES','3DES'].includes(selectedCryptoAlgorithm()?.split('-')[0])?8:16)),'Hex');revision++;status('已生成随机 IV')};
+for(const id of ['aes-key','aes-iv','aes-key-format','aes-format'])$(id).addEventListener('input',()=>{revision++;status('参数已修改，请重新执行')});
+for(const id of ['rsa-key','rsa-format','sm2-key','sm2-format','sm2-prefix'])$(id).addEventListener('input',()=>{revision++;status('参数已修改，请重新执行')});
+function binaryString(bytes){return Array.from(bytes,b=>String.fromCharCode(b)).join('')}
+function rsaPKCS1(action,value,params){
+ const keyText=params.rsaKey.trim();let key;
+ if(keyText.startsWith('{')){const jwk=JSON.parse(keyText);if(jwk.kty!=='RSA')throw new Error('需要 RSA JWK');const n=forge.util.createBuffer(binaryString(fromBase64(jwk.n.replace(/-/g,'+').replace(/_/g,'/')))).toHex(),e=decodeBytesFromJWK(jwk.e);const big=v=>new forge.jsbn.BigInteger(decodeBytesFromJWK(v),16);key=action==='encrypt'?forge.pki.setRsaPublicKey(new forge.jsbn.BigInteger(n,16),new forge.jsbn.BigInteger(e,16)):forge.pki.setRsaPrivateKey(big(jwk.n),big(jwk.e),big(jwk.d),big(jwk.p),big(jwk.q),big(jwk.dp),big(jwk.dq),big(jwk.qi));}
+ else key=action==='encrypt'?forge.pki.publicKeyFromPem(keyText):forge.pki.privateKeyFromPem(keyText);
+ if(action==='encrypt'){const bytes=encoder.encode(value);if(bytes.length>Math.ceil(key.n.bitLength()/8)-11)throw new Error('RSA PKCS#1 明文过长');return encodeBytes(Uint8Array.from(key.encrypt(binaryString(bytes),'RSAES-PKCS1-V1_5'),c=>c.charCodeAt(0)),params.rsaFormat)}
+ return decoder.decode(Uint8Array.from(key.decrypt(binaryString(decodeBytes(value,params.rsaFormat)),'RSAES-PKCS1-V1_5'),c=>c.charCodeAt(0)));
+}
+function decodeBytesFromJWK(value){if(typeof value!=='string')throw new Error('JWK 缺少密钥参数');return encodeBytes(fromBase64(value.replace(/-/g,'+').replace(/_/g,'/')),'Hex')}
+async function hmacTransform(name,value,params){const bytes=decodeBytes(params.key,params.keyFormat);if(!bytes.length)throw new Error('请填写 HMAC 密钥');let result;if(name==='HMAC-SM3')result=decodeBytes(smCrypto.sm3(value,{key:Array.from(bytes)}),'Hex');else if(name==='HMAC-MD5')result=decodeBytes(CryptoJS.HmacMD5(CryptoJS.enc.Hex.parse(encodeBytes(encoder.encode(value),'Hex')),CryptoJS.enc.Hex.parse(encodeBytes(bytes,'Hex'))).toString(),'Hex');else{const key=await crypto.subtle.importKey('raw',bytes,{name:'HMAC',hash:name.slice(5)},false,['sign']);result=new Uint8Array(await crypto.subtle.sign('HMAC',key,encoder.encode(value)))}return encodeBytes(result,params.format)}
+function unpad(bytes,block){const n=bytes[bytes.length-1];if(!n||n>block||n>bytes.length||!bytes.subarray(bytes.length-n).every(b=>b===n))throw new Error('填充校验失败，请检查密钥和密文');return bytes.subarray(0,bytes.length-n)}
+function legacyTransform(name,action,value,params){
+ const family=name.split('-')[0],cbc=name.endsWith('CBC'),size=family==='SM4'?16:8,key=decodeBytes(params.key,params.keyFormat),iv=cbc?decodeBytes(params.iv,'Hex'):new Uint8Array();
+ if(!(family==='SM4'?key.length===16:family==='DES'?key.length===8:[16,24].includes(key.length)))throw new Error('密钥长度不符合 '+family+' 要求');if(cbc&&iv.length!==size)throw new Error('CBC IV 必须是 '+size+' 字节');
+ let data=action==='encrypt'?encoder.encode(value):decodeBytes(value,params.format);if(action==='encrypt'){const padding=size-data.length%size,padded=new Uint8Array(data.length+padding);padded.set(data);padded.fill(padding,data.length);data=padded}else if(!data.length||data.length%size)throw new Error('密文长度必须是块大小的整数倍');
+ let result;
+ if(family==='SM4'){const options={padding:'none',output:'array',...(cbc?{mode:'cbc',iv:Array.from(iv)}:{})};result=Uint8Array.from(smCrypto.sm4[action](Array.from(data),Array.from(key),options))}
+ else{const algorithm=family==='DES'?CryptoJS.DES:CryptoJS.TripleDES,options={mode:cbc?CryptoJS.mode.CBC:CryptoJS.mode.ECB,padding:CryptoJS.pad.NoPadding,iv:CryptoJS.enc.Hex.parse(encodeBytes(iv,'Hex'))},word=CryptoJS.enc.Hex.parse(encodeBytes(data,'Hex')),keyWord=CryptoJS.enc.Hex.parse(encodeBytes(key,'Hex'));const output=action==='encrypt'?algorithm.encrypt(word,keyWord,options).ciphertext:algorithm.decrypt({ciphertext:word},keyWord,options);result=decodeBytes(output.toString(),'Hex')}
+ return action==='encrypt'?encodeBytes(result,params.format):decoder.decode(unpad(result,size));
+}
+function sm2Transform(name,action,value,params){const key=params.sm2Key.replace(/\s/g,''),mode=name==='SM2-C1C3C2'?1:0;if(action==='encrypt'){if(!value)throw new Error('SM2 暂不支持空文本');if(!/^(?:04[0-9a-f]{128}|0[23][0-9a-f]{64})$/i.test(key)||!smCrypto.sm2.verifyPublicKey(key))throw new Error('请输入有效 SM2 Hex 公钥');const encrypted=smCrypto.sm2.doEncrypt(value,key,mode);return encodeBytes(decodeBytes((params.sm2Prefix==='yes'?'04':'')+encrypted,'Hex'),params.sm2Format)}if(!/^[0-9a-f]{64}$/i.test(key)||/^0+$/.test(key))throw new Error('SM2 私钥需要 64 位 Hex');let cipher=encodeBytes(decodeBytes(value,params.sm2Format),'Hex');if(params.sm2Prefix==='yes'){if(!cipher.startsWith('04'))throw new Error('密文缺少 04 前缀');cipher=cipher.slice(2)}if(cipher.length<192)throw new Error('SM2 密文过短');const plain=smCrypto.sm2.doDecrypt(cipher,key,mode,{output:'array'});if(!plain||!plain.length)throw new Error('SM2 解密失败，请检查私钥、密文顺序和 04 前缀');return decoder.decode(Uint8Array.from(plain))}
+async function rsaTransform(name,action,value,params){
+ if(!globalThis.crypto?.subtle)throw new Error('当前浏览器不支持 Web Crypto。');
+ const hash=name.slice('RSA-OAEP-'.length),text=params.rsaKey.trim();let format,material;
+ if(text.startsWith('{')){format='jwk';material=JSON.parse(text);if(material.kty!=='RSA'||(action==='decrypt'&&!material.d)||(action==='encrypt'&&material.d))throw new Error('加密需要 RSA 公钥，解密需要 RSA 私钥。')}
+ else{const type=action==='encrypt'?'PUBLIC':'PRIVATE',match=text.match(new RegExp('^-----BEGIN '+type+' KEY-----([A-Za-z0-9+/=\\s]+)-----END '+type+' KEY-----$'));if(!match)throw new Error('加密需要 SPKI PUBLIC KEY，解密需要 PKCS#8 PRIVATE KEY（不支持 PKCS#1 RSA PRIVATE KEY）。');format=action==='encrypt'?'spki':'pkcs8';material=fromBase64(match[1])}
+ try{const key=await crypto.subtle.importKey(format,material,{name:'RSA-OAEP',hash},false,[action]);
+ const data=action==='encrypt'?encoder.encode(value):decodeBytes(value,params.rsaFormat);
+ if(action==='encrypt'&&data.length>key.algorithm.modulusLength/8-2*(hash==='SHA-1'?160:Number(hash.slice(4)))/8-2)throw new Error('明文过长，RSA-OAEP 只适合短文本。');
+ const result=new Uint8Array(await crypto.subtle[action]('RSA-OAEP',key,data));return action==='encrypt'?encodeBytes(result,params.rsaFormat):decoder.decode(result);
+ }catch(error){throw new Error('RSA 操作失败：'+(error.name==='OperationError'?'请检查密钥、OAEP Hash 和密文编码':error.message))}
+}
+function aesECB(action,value,keyBytes,format){
+ if(![16,24,32].includes(keyBytes.length))throw new Error('AES 密钥必须是 16、24 或 32 字节。');
+ const key=CryptoJS.enc.Hex.parse(encodeBytes(keyBytes,'Hex'));
+ if(action==='encrypt'){const data=CryptoJS.enc.Hex.parse(encodeBytes(encoder.encode(value),'Hex'));const result=CryptoJS.AES.encrypt(data,key,{mode:CryptoJS.mode.ECB,padding:CryptoJS.pad.Pkcs7});return encodeBytes(decodeBytes(result.ciphertext.toString(CryptoJS.enc.Hex),'Hex'),format)}
+ const ciphertext=decodeBytes(value,format);if(!ciphertext.length||ciphertext.length%16)throw new Error('ECB 密文长度必须是 16 字节的整数倍。');
+ const result=CryptoJS.AES.decrypt({ciphertext:CryptoJS.enc.Hex.parse(encodeBytes(ciphertext,'Hex'))},key,{mode:CryptoJS.mode.ECB,padding:CryptoJS.pad.NoPadding});
+ const plain=decodeBytes(result.toString(CryptoJS.enc.Hex),'Hex'),padding=plain[plain.length-1];
+ if(padding<1||padding>16||!plain.subarray(plain.length-padding).every(b=>b===padding))throw new Error('ECB 填充校验失败，请检查密钥和密文。');
+ return decoder.decode(plain.subarray(0,plain.length-padding));
+}
+async function aesTransform(name,action,value,params){
+ if(!crypto?.subtle)throw new Error('当前浏览器不支持 Web Crypto。');
+ const keyBytes=decodeBytes(params.key,params.keyFormat);
+ if(name==='AES-ECB')return aesECB(action,value,keyBytes,params.format);
+ const iv=decodeBytes(params.iv,'Hex');
+ if(![16,24,32].includes(keyBytes.length))throw new Error('AES 密钥必须是 16、24 或 32 字节。');
+ if(iv.length!==(name==='AES-GCM'?12:16))throw new Error(name==='AES-GCM'?'GCM IV 必须是 12 字节。':'IV / Counter 必须是 16 字节。');
+ const algorithm=name==='AES-CTR'?{name,counter:iv,length:64}:name==='AES-GCM'?{name,iv,tagLength:128}:{name,iv};
+ const key=await crypto.subtle.importKey('raw',keyBytes,name,false,[action]);
+ try{const result=new Uint8Array(await crypto.subtle[action](algorithm,key,action==='encrypt'?encoder.encode(value):decodeBytes(value,params.format)));return action==='encrypt'?encodeBytes(result,params.format):decoder.decode(result)}catch{throw new Error('加解密失败，请检查密钥、IV、密文编码及 GCM Tag。')}
+}
+async function transform(tool,action,value,option,keyMaterial='',aesParams={}){const bytes=encoder.encode(value);
+ if(tool==='markdown')return markdownHTML(value);
+ if(tool==='strings'){
+  if(action==='escape')return escapeString(value);
+  if(action==='unescape')return unescapeString(value);
+  if(action==='quotes')return singleToDoubleQuotes(value);
+ }
+ if(tool==='hash'&&option==='RSA-PKCS1-v1_5')return rsaPKCS1(action,value,aesParams);
+ if(tool==='hash'&&option==='SM3')return smCrypto.sm3(value);
+ if(tool==='hash'&&option?.startsWith('HMAC-'))return hmacTransform(option,value,aesParams);
+ if(tool==='hash'&&option?.startsWith('SM2-'))return sm2Transform(option,action,value,aesParams);
+ if(tool==='hash'&&/^(SM4|DES|3DES)-/.test(option))return legacyTransform(option,action,value,aesParams);
+ if(tool==='hash'&&option?.startsWith('RSA-OAEP-'))return rsaTransform(option,action,value,aesParams);
+ if(tool==='hash'&&option?.startsWith('AES-'))return aesTransform(option,action,value,aesParams);
+ if(tool==='hash'&&option==='Base64')return action==='encode'?encodeBytes(bytes,'Base64'):decoder.decode(fromBase64(value));
+ if(tool==='hash'){const algorithm=option;if(algorithm==='MD5')return md5(bytes);if(!globalThis.crypto?.subtle)throw new Error('当前环境不支持 SHA，请用现代浏览器打开本地文件。');const digest=await crypto.subtle.digest(algorithm,bytes);return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('')}
+ if(tool==='jwt'){
+  const token=value.trim().replace(/^Bearer\s+/i,''),parts=token.split('.');
+  if(parts.length!==3||!parts[0]||!parts[1]||!parts.every(part=>/^[A-Za-z0-9_-]*$/.test(part)))throw new Error('请输入三段式 JWT（Header.Payload.Signature），支持 Bearer 前缀。');
+  const parse=part=>JSON.parse(decoder.decode(fromBase64(part.replace(/-/g,'+').replace(/_/g,'/'))));
+  const header=parse(parts[0]),payload=parse(parts[1]);
+  if(!header||typeof header!=='object'||Array.isArray(header)||!payload||typeof payload!=='object'||Array.isArray(payload))throw new Error('JWT Header 和 Payload 必须是 JSON 对象。');
+  const times={};for(const key of ['iat','nbf','exp'])if(Object.hasOwn(payload,key)){
+   const timestamp=payload[key],date=new Date(typeof timestamp==='number'?timestamp*1000:NaN);
+   times[key]=Number.isFinite(timestamp)&&!Number.isNaN(date.getTime())?date.toISOString():'无效的 NumericDate';
+  }
+  const signatureVerified=action==='verify'?await verifyJWT(parts,header,keyMaterial):null;
+  return {output:JSON.stringify({header,payload,signature:parts[2]},null,2),signatureVerified,algorithm:header.alg,times};
+ }
+ if(tool==='json')return JSON.stringify(JSON.parse(action==='repair'?repairJSONStrings(value):value),null,action==='minify'?undefined:option==='2'?'\t':option==='1'?4:2);
+}
+async function run(action){if(busy)return;const token=revision,tool=current,value=$('input').value,option=current==='hash'?selectedCryptoAlgorithm():$('option').value,keyMaterial=$('jwt-key').value;busy=true;$('actions').querySelectorAll('button').forEach(b=>b.disabled=true);status('处理中…');try{const result=await transform(tool,action,value,option,keyMaterial,{sm2Key:$('sm2-key').value,sm2Format:$('sm2-format').value,sm2Prefix:$('sm2-prefix').value,rsaKey:$('rsa-key').value,rsaFormat:$('rsa-format').value,key:$('aes-key').value,keyFormat:$('aes-key-format').value,iv:$('aes-iv').value,format:$('aes-format').value});if(token!==revision)return;const output=tool==='jwt'?result.output:result;$('output').value=output;if(tool==='jwt'){const lines=['工具信息（不属于 JWT 原始内容）',action==='verify'?`签名校验：${result.signatureVerified?'成功':'失败'} · 算法：${result.algorithm}`:'签名校验：未执行'];for(const [key,time] of Object.entries(result.times))lines.push(`${key}（UTC）：${time}`);$('jwt-info').textContent=lines.join('\n');$('jwt-info').hidden=false}if(tool==='json')renderJSON(JSON.parse(result));else if(tool==='markdown')paintMarkdown(result);else updateView();if(tool==='jwt'&&action==='verify'){const verified=result.signatureVerified;status(verified?'签名校验成功（未检查有效期、签发者和受众）':'签名校验失败：签名与密钥不匹配',!verified)}else status(`${tool==='json'&&action==='repair'?'启发式修复完成，请核对字符串内容':'完成'} · 输出 ${output.length.toLocaleString()} 个 UTF-16 字符`)}catch(error){if(token!==revision)return;clearResult();status('处理失败：'+error.message,true)}finally{busy=false;saveToolContent();$('actions').querySelectorAll('button').forEach(b=>b.disabled=false)}}
+$('input').oninput=()=>{revision++;$('count').textContent=`· ${encoder.encode($('input').value).length.toLocaleString()} 字节`;clearResult();if(current==='markdown'){try{renderMarkdown()}catch(error){status('渲染失败：'+error.message,true);return}}status('')};
+function formatPEM(value){
+ const match=value.trim().match(/^-----BEGIN PUBLIC KEY-----([\s\S]*?)-----END PUBLIC KEY-----$/);
+ if(!match)return value;
+ const body=match[1].replace(/\\r\\n|\\n|\\r/g,'').replace(/\s/g,'');
+ if(!body||!/^[A-Za-z0-9+/]+={0,2}$/.test(body))return value;
+ return '-----BEGIN PUBLIC KEY-----\n'+body.match(/.{1,64}/g).join('\n')+'\n-----END PUBLIC KEY-----';
+}
+$('jwt-key').addEventListener('paste',event=>{
+ const text=event.clipboardData?.getData('text/plain');if(!text)return;
+ const formatted=formatPEM(text);if(formatted===text)return;
+ event.preventDefault();$('jwt-key').setRangeText(formatted,$('jwt-key').selectionStart,$('jwt-key').selectionEnd,'end');$('jwt-key').oninput();
+});
+$('jwt-key').addEventListener('blur',()=>{const formatted=formatPEM($('jwt-key').value);if(formatted!==$('jwt-key').value){$('jwt-key').value=formatted;$('jwt-key').oninput()}});
+$('jwt-key').oninput=()=>{
+ revision++;
+ if(current!=='jwt')return;
+ if($('output').value){
+  $('jwt-info').textContent=$('jwt-info').textContent.replace(/^签名校验：.*$/m,'签名校验：密钥已修改，待重新校验');
+  status('密钥已修改，点击“校验签名”重新校验');
+ }else status('');
+};
+$('option').onchange=()=>{revision++;clearResult();updateCryptoControls('');status('')};
+$('input-wrap').onclick=()=>{const enabled=$('input-wrap').getAttribute('aria-pressed')!=='true';$('input-wrap').setAttribute('aria-pressed',String(enabled));$('input-wrap').textContent='Word wrap：'+(enabled?'开':'关');$('input').wrap=enabled?'soft':'off';$('input').style.whiteSpace=enabled?'pre-wrap':'pre';$('input').style.overflowWrap=enabled?'anywhere':'normal'};
+$('clear').onclick=()=>{$('input').value='';$('input').oninput();$('input').focus()};
+function markdownPlainText(html){
+ const element=document.createElement('div');element.innerHTML=html;
+ element.style.cssText='position:fixed;left:-100000px;top:0;white-space:normal';
+ document.body.append(element);const text=element.innerText??element.textContent;element.remove();return text;
+}
+$('copy').onclick=async()=>{
+ if(current==='markdown'&&!markdownSource){
+  const html=$('output').value,plain=markdownPlainText(html);
+  try{
+   if(!navigator.clipboard?.write||typeof ClipboardItem==='undefined')throw new Error('富文本剪贴板不可用');
+   await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([plain],{type:'text/plain'})})]);
+   status('已复制富文本；普通文本编辑器会粘贴纯文本');
+  }catch{
+   try{await navigator.clipboard.writeText(plain);status('当前环境不支持富文本复制，已复制纯文本')}
+   catch{const element=document.createElement('textarea');element.value=plain;document.body.append(element);element.select();const copied=document.execCommand('copy');element.remove();status(copied?'已复制纯文本':'复制失败，请切换 HTML 源码视图后手动复制',!copied)}
+  }
+  return;
+ }
+ try{await navigator.clipboard.writeText($('output').value);status('已复制结果')}
+ catch{treeMode=false;updateView();$('output').focus();$('output').select();status('请按 Ctrl+C / ⌘C 复制已选中的结果。')}
+};
+const reuse=document.createElement('button');reuse.textContent='输出 → 输入';reuse.onclick=()=>{$('input').value=$('output').value;$('input').oninput()};
+$('theme').onchange=()=>{
+ theme=$('theme').value;document.documentElement.dataset.theme=theme;
+ try{localStorage.setItem('text-toolbox-theme',theme)}catch{}
+ mermaid.initialize({startOnLoad:false,securityLevel:'strict',htmlLabels:false,theme:theme==='light'?'default':'dark',flowchart:{htmlLabels:false},suppressErrorRendering:true});
+ revision++;if(current==='markdown')renderMarkdown();
+};
+let initialTab='json';try{const saved=localStorage.getItem('text-toolbox-tab');if(Object.hasOwn(configs,saved))initialTab=saved}catch{}
+selectTool(initialTab);
+</script></body></html>

@@ -1,0 +1,101 @@
+# Tech Hub
+
+个人技术工作台，提供公开的浏览器工具和私有 GitHub 仓库的文档阅读入口。使用原生 JavaScript + Vite，无需后端。
+
+## 本地使用
+
+需要 Node.js 22.12 或更新版本。无需凭证即可预览工具页：
+
+```sh
+npm ci
+npm run dev
+# 打开 http://127.0.0.1:4173
+```
+
+### 配置文档源
+
+根目录 `.env` 保存可公开、随代码提交的默认配置：
+
+```dotenv
+VITE_GITHUB_REPOSITORY=liuzhenghua/tech
+VITE_DOCS_DIR=docs
+```
+
+仓库使用 `owner/repo` 格式，文档目录是仓库相对路径，支持 `knowledge/docs` 等多层目录；设为 `/` 时递归收录整个仓库的 Markdown 文件。文档库只收录指定目录下的 Markdown 文件，分类对应其中的主题目录。
+
+本机覆盖配置可写入忽略提交的 `.env.local`。修改配置后重启开发服务；线上修改需要重新构建发布。
+
+### 配置访问口令
+
+1. 打开 [Fine-grained PAT 创建页面](https://github.com/settings/personal-access-tokens/new)，选择文档源仓库，授予 **Contents: Read-only** 并设置有效期。详细步骤见 [GitHub 官方说明](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)。
+2. 复制 `.env.example` 为 `.env.token.local`，填写 Token 和容易记住的长口令。两个文件中的示例值需要替换，真实凭证不要提交。
+3. 首次配置或更换 Token 时执行：
+
+```sh
+node --env-file=.env.token.local tools/encrypt-token.mjs
+```
+
+脚本将 Token 密文写入 `.env.local` 的 `VITE_GITHUB_TOKEN_BOX`。Vite 启动和构建时自动读取，页面输入口令即可解锁。若开发服务正在运行，生成密文后重启服务。
+
+## 发布到 GitHub Pages
+
+在网站仓库配置以下项目：
+
+1. **Settings → Secrets and variables → Actions → Secrets**：添加 `VITE_GITHUB_TOKEN_BOX`，值为 `.env.local` 中该变量等号后的密文。
+2. **Settings → Pages → Source**：选择 **GitHub Actions**。
+3. 推送到 `main`，或在 **Actions → Deploy Tech Hub → Run workflow** 手动发布。
+
+默认地址为 [liuzhenghua.github.io/tech-hub](https://liuzhenghua.github.io/tech-hub/)。工作流安装依赖、检查格式、运行测试并构建发布；私有文档不进入构建产物。
+
+### 在 GitHub 覆盖文档源
+
+可以修改并提交 `.env`，也可在 **Settings → Secrets and variables → Actions → Variables** 添加 Repository variables：
+
+| 配置                     | 是否必填           | 默认值             | GitHub 配置位置 | 用途                                             |
+| ------------------------ | ------------------ | ------------------ | --------------- | ------------------------------------------------ |
+| `VITE_GITHUB_REPOSITORY` | 否                 | `liuzhenghua/tech` | Variables       | 文档源仓库，格式为 `owner/repo`                  |
+| `VITE_DOCS_DIR`          | 否                 | `docs`             | Variables       | 仓库内文档目录，支持多层路径；`/` 表示仓库根目录 |
+| `VITE_GITHUB_TOKEN_BOX`  | 访问私有文档时必填 | 无                 | Secrets         | 加密后的 Token；未配置时只能使用公开工具         |
+
+使用默认文档源时，无需添加 Variables，只需配置密文 Secret。两个可选变量未设置或为空时使用程序默认值。保存配置后重新运行发布工作流。更换仓库时，还需确认 Token 有对应仓库的读取权限；Token 过期或更换后，重新生成密文并更新 Secret。
+
+## 阅读与本地缓存
+
+文档页提供分类卡片、搜索和正文预览，点击进入详情。每篇文档有独立 URL，可刷新恢复；未解锁时先输入口令。支持 Markdown、Mermaid、相对文档链接及仓库内 PNG、JPEG、GIF、WebP 图片。代码块可复制，图表可放大、复制和下载。
+
+默认记住口令，口令、列表和最近阅读的正文以明文保存在当前浏览器 localStorage。再次进入先显示缓存，再后台解锁并检查更新；Token 仅留在内存。正文最多缓存 10 篇，每篇上限 150,000 字符，图片不缓存。文件 SHA 变化时正文缓存失效，切换仓库、目录或 Token 密文后不复用旧缓存。
+
+不勾选记住口令时不保留文档缓存。点击“锁定”会清除口令、缓存和当前内容。网络失败时可阅读缓存正文，未缓存内容需要联网；浏览器存储不可用时仍可在线阅读。
+
+### 访问边界
+
+- 目录按默认分支的同一个提交加载；搜索匹配路径、文件名及已读取的标题，不是全文搜索。摘要在卡片进入可视区域后加载。
+- 外部图片不自动加载；非 Markdown 的仓库文件需在 GitHub 查看。GitHub 截断大型仓库目录时会提示错误。
+- Markdown 经 DOMPurify 清洗，Mermaid 使用 strict 模式。独立工具页不接收凭证。
+
+### 凭证保护
+
+`VITE_` 前缀表示允许进入前端构建，只有密文和公开配置使用此前缀。原始 `DATA_GITHUB_TOKEN`、`DATA_TOKEN_PASSPHRASE` 仅供本机加密脚本使用。
+
+Token 使用 PBKDF2-HMAC-SHA256（600,000 次迭代、16 字节随机 salt）派生的 AES-256-GCM 密钥加密，每次生成随机 12 字节 IV。公开密文可被离线猜解，应使用长口令及独立的只读 Token。
+
+同一 `github.io` 域名下的项目共享 origin，localStorage 不按路径隔离。同源脚本属于信任范围；需要隔离时使用独立域名，不引入不可信脚本。
+
+## 开发与维护
+
+```sh
+npm test                 # 行为测试
+npm run format:check     # 格式检查；npm run format 自动整理
+npm run build            # 生产产物输出到 dist/
+npm run preview          # 本地检查生产构建
+```
+
+开发服务支持热更新，生产资源使用相对路径以兼容 Pages 仓库子路径。依赖由 `package-lock.json` 锁定；Mermaid 按需加载。
+
+- `src/`：页面、阅读器、API、缓存和凭证解锁；CSS 按布局与组件分区。
+- `public/tools/text-toolbox/`：独立工具快照及依赖许可证，更新时同步整个目录。
+- `tools/`：Token 加密程序。
+- `tests/`：解锁、API、缓存和路由测试。
+- `vite.config.js`：开发服务与构建配置。
+
+文档协作遵循 [AGENTS.md](./AGENTS.md)。
