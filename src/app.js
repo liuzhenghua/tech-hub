@@ -21,6 +21,9 @@ const config = {
 import { Repository, unlockTokenBox, resolvePath } from './core.js';
 const $ = (id) => document.getElementById(id),
   storageKey = 'tech-hub:passphrase:v1';
+const siteTitle = import.meta.env.VITE_SITE_TITLE?.trim() || '文档与工具';
+$('site-brand').textContent = siteTitle;
+$('footer-brand').textContent = siteTitle;
 let repo = null,
   entries = [],
   current = '',
@@ -72,7 +75,7 @@ function lock() {
   $('unlock').hidden = false;
   $('lock').hidden = true;
   $('secret').value = '';
-  $('total').textContent = 'tech / PRIVATE';
+  $('total').textContent = '私有文档';
   try {
     localStorage.removeItem(storageKey);
   } catch {}
@@ -528,7 +531,7 @@ function navigate() {
   $('nav-docs').toggleAttribute('aria-current', docs);
   if (!docs) $('nav-tools').setAttribute('aria-current', 'page');
   else $('nav-docs').setAttribute('aria-current', 'page');
-  document.title = docs ? '文档 · Tech Hub' : '工具 · Tech Hub';
+  document.title = `${docs ? '文档' : '工具'} · ${siteTitle}`;
   if (
     docs &&
     route.path &&

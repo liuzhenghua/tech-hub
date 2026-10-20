@@ -23,6 +23,7 @@ jobs:
       - run: npm run build
         env:
           VITE_GITHUB_REPOSITORY: ${{ vars.VITE_GITHUB_REPOSITORY }}
+          VITE_SITE_TITLE: ${{ vars.VITE_SITE_TITLE }}
           VITE_DOCS_DIR: ${{ vars.VITE_DOCS_DIR }}
           VITE_GITHUB_TOKEN_BOX: ${{ secrets.VITE_GITHUB_TOKEN_BOX }}
       - uses: actions/configure-pages@v5

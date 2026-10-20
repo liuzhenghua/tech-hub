@@ -4,13 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="referrer" content="no-referrer" />
-    <title>Tech Hub · 技术工作台</title>
+    <title>文档与工具</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">跳到主要内容</a>
     <header>
-      <a class="brand" href="#tools">tech<span> / </span>hub</a>
+      <a id="site-brand" class="brand" href="#tools">文档与工具</a>
       <nav aria-label="主导航">
         <a id="nav-tools" href="#tools">工具</a
         ><a id="nav-docs" href="#docs">文档</a
@@ -62,7 +62,7 @@
       <section id="library" hidden>
         <div class="section-title">
           <h2>私有文档库</h2>
-          <span id="total">tech / PRIVATE</span>
+          <span id="total">私有文档</span>
         </div>
         <form id="unlock">
           <div>
@@ -114,7 +114,10 @@
           </div>
         </div>
       </section>
-      <footer>TECH HUB <span>公开工具 · 私有知识 · 持续积累</span></footer>
+      <footer>
+        <span id="footer-brand">文档与工具</span
+        ><span>公开工具 · 私有知识 · 持续积累</span>
+      </footer>
     </main>
     <script type="module" src="app.js"></script>
   </body>

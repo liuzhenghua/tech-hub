@@ -1,6 +1,8 @@
-# Tech Hub
+# 文档与工具
 
-个人技术工作台，提供公开的浏览器工具和私有 GitHub 仓库的文档阅读入口。使用原生 JavaScript + Vite，无需后端。
+通用文档与工具平台，提供浏览器工具和私有 GitHub 仓库的文档阅读入口。使用原生 JavaScript + Vite，无需后端。
+
+默认 GitHub Pages 访问地址：[https://liuzhenghua.github.io/tech-hub/](https://liuzhenghua.github.io/tech-hub/)。这是部署地址，实际可用性取决于发布状态。自行部署时，默认地址为 `https://<GitHub 用户名>.github.io/<网站仓库名>/`，与文档源仓库配置无关。
 
 ## 本地使用
 
@@ -19,6 +21,7 @@ npm run dev
 ```dotenv
 VITE_GITHUB_REPOSITORY=liuzhenghua/tech
 VITE_DOCS_DIR=docs
+VITE_SITE_TITLE=文档与工具
 ```
 
 仓库使用 `owner/repo` 格式，文档目录是仓库相对路径，支持 `knowledge/docs` 等多层目录；设为 `/` 时递归收录整个仓库的 Markdown 文件。文档库只收录指定目录下的 Markdown 文件，分类对应其中的主题目录。
@@ -53,11 +56,12 @@ node --env-file=.env.token.local tools/encrypt-token.mjs
 
 | 配置                     | 是否必填           | 默认值             | GitHub 配置位置 | 用途                                             |
 | ------------------------ | ------------------ | ------------------ | --------------- | ------------------------------------------------ |
+| `VITE_SITE_TITLE`        | 否                 | `文档与工具`       | Variables       | 页面品牌、浏览器标题和页脚名称                   |
 | `VITE_GITHUB_REPOSITORY` | 否                 | `liuzhenghua/tech` | Variables       | 文档源仓库，格式为 `owner/repo`                  |
 | `VITE_DOCS_DIR`          | 否                 | `docs`             | Variables       | 仓库内文档目录，支持多层路径；`/` 表示仓库根目录 |
 | `VITE_GITHUB_TOKEN_BOX`  | 访问私有文档时必填 | 无                 | Secrets         | 加密后的 Token；未配置时只能使用公开工具         |
 
-使用默认文档源时，无需添加 Variables，只需配置密文 Secret。两个可选变量未设置或为空时使用程序默认值。保存配置后重新运行发布工作流。更换仓库时，还需确认 Token 有对应仓库的读取权限；Token 过期或更换后，重新生成密文并更新 Secret。
+使用默认文档源时，无需添加 Variables，只需配置密文 Secret。可选变量未设置或为空时使用程序默认值。保存配置后重新运行发布工作流。更换仓库时，还需确认 Token 有对应仓库的读取权限；Token 过期或更换后，重新生成密文并更新 Secret。
 
 ## 阅读与本地缓存
 
