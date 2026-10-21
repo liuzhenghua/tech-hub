@@ -5,6 +5,7 @@ import { DocumentSession } from './documents/session';
 import { createCatalog } from './documents/catalog';
 import { createReader } from './documents/reader';
 import { mountToolCatalog } from './tool-catalog';
+import { mountDocumentExport } from './documents/export';
 
 function element<T extends HTMLElement>(id: string): T {
   const node = document.getElementById(id);
@@ -141,6 +142,7 @@ async function unlock(passphrase: string, save: boolean) {
 }
 const events = new AbortController();
 const disposeTools = mountToolCatalog(element('tools-page'));
+const disposeExport = mountDocumentExport(reader.snapshot);
 form.addEventListener(
   'submit',
   (event) => {
@@ -186,6 +188,7 @@ function dispose() {
   unlocking++;
   events.abort();
   disposeTools();
+  disposeExport();
   catalog.dispose();
   reader.dispose();
   session.dispose();

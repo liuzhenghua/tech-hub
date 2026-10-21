@@ -943,3 +943,126 @@ body > header {
   font-size: 12px;
   flex-shrink: 0;
 }
+
+.document-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.document-actions .back-button {
+  margin: 0;
+}
+.document-export {
+  position: relative;
+}
+.document-export summary {
+  cursor: pointer;
+  list-style: none;
+  color: var(--accent);
+  font-size: 13px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+.document-export summary::-webkit-details-marker {
+  display: none;
+}
+.export-options {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 10;
+  min-width: 190px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px #243b281a;
+}
+.export-options button {
+  display: block;
+  width: 100%;
+  border: 0;
+  text-align: left;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+}
+.export-options button:hover {
+  background: var(--surface-soft);
+}
+@media print {
+  @page {
+    margin: 16mm;
+  }
+  body {
+    display: block;
+    min-width: 0;
+    background: white;
+  }
+  body > header,
+  .skip-link,
+  main > footer,
+  #tools-page,
+  #library > .section-title,
+  #unlock,
+  #doc-catalog,
+  .document-actions,
+  #outline,
+  #status,
+  .copy-code,
+  .diagram-toolbar,
+  dialog {
+    display: none !important;
+  }
+  body > main,
+  #library,
+  #workspace,
+  #doc-detail,
+  .reading-layout,
+  article,
+  #document {
+    display: block !important;
+    width: auto;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+  #doc-head {
+    margin-bottom: 12px;
+  }
+  #document {
+    color: #111;
+    font-size: 11pt;
+  }
+  #document pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  #document table {
+    display: table;
+    width: 100%;
+    font-size: 10pt;
+  }
+  #document tr,
+  #document img,
+  #document .diagram {
+    break-inside: avoid;
+  }
+  #document h1,
+  #document h2,
+  #document h3 {
+    break-after: avoid;
+  }
+  #document svg,
+  #document img {
+    max-width: 100%;
+    height: auto;
+  }
+}

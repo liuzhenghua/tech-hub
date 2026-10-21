@@ -19,8 +19,16 @@ export function createReader(
   open: (path: string, anchor?: string) => void,
 ) {
   let generation = 0;
+  let loaded: { path: string; markdown: string } | null = null;
+  const exportButtons = document.querySelectorAll<HTMLButtonElement>(
+    '#export-markdown,#export-pdf',
+  );
   const urls: string[] = [];
   function clear() {
+    loaded = null;
+    exportButtons.forEach((button) => {
+      button.disabled = true;
+    });
     generation++;
     urls.splice(0).forEach((url) => URL.revokeObjectURL(url));
     elements.body.replaceChildren();
@@ -150,6 +158,10 @@ export function createReader(
         }
       }
       if (id !== generation) return;
+      loaded = { path, markdown };
+      exportButtons.forEach((button) => {
+        button.disabled = false;
+      });
       if (anchor)
         elements.body
           .querySelector(`[id="${CSS.escape(anchor)}"]`)
@@ -160,5 +172,5 @@ export function createReader(
         status(error instanceof Error ? error.message : String(error));
     }
   }
-  return { show, clear, dispose: clear };
+  return { show, clear, snapshot: () => loaded, dispose: clear };
 }

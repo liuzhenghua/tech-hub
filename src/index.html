@@ -184,7 +184,16 @@
             <div id="files" class="document-grid" aria-label="文档列表"></div>
           </div>
           <div id="doc-detail" hidden>
-            <button id="back-to-docs" class="back-button">← 返回文档</button>
+            <div class="document-actions">
+              <button id="back-to-docs" class="back-button">← 返回文档</button>
+              <details id="document-export" class="document-export">
+                <summary>导出 ▾</summary>
+                <div class="export-options">
+                  <button id="export-markdown" disabled>Markdown（.md）</button>
+                  <button id="export-pdf" disabled>PDF（打印 / 另存为）</button>
+                </div>
+              </details>
+            </div>
             <div class="reading-layout">
               <article>
                 <div id="doc-head"></div>
