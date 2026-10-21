@@ -285,7 +285,7 @@ footer {
   margin: 0;
   min-height: 3.6em;
 }
-@media (max-width: 600px) {
+@media screen and (max-width: 600px) {
   #tools-page > .section-title {
     align-items: stretch;
     flex-direction: column;
@@ -440,16 +440,16 @@ footer {
 }
 article {
   min-width: 0;
-  padding: 24px;
+  padding: 32px;
 }
 #doc-head {
   font:
     11px/1.7 ui-monospace,
     monospace;
   color: var(--muted);
-  padding-bottom: 12px;
+  flex: 1;
+  min-width: 0;
   overflow-wrap: anywhere;
-  max-width: 760px;
   margin: 0;
 }
 #document {
@@ -478,7 +478,7 @@ article {
 }
 #outline strong {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   margin-bottom: 12px;
 }
 #outline button {
@@ -491,7 +491,7 @@ article {
   padding: 5px 12px;
   color: var(--muted);
   background: transparent;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.6;
 }
 #outline button:hover {
@@ -550,23 +550,29 @@ article {
   scroll-margin-top: 16px;
 }
 
+@media screen {
+  #document > :first-child {
+    margin-top: 0;
+  }
+}
+
 /* Responsive layout and motion preferences */
-@media (min-width: 701px) {
+@media screen and (min-width: 701px) {
   .tools-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-@media (min-width: 1001px) {
+@media screen and (min-width: 1001px) {
   .tools-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
-@media (min-width: 1200px) {
+@media screen and (min-width: 1200px) {
   .reading-layout:has(#outline:not([hidden])) {
-    grid-template-columns: minmax(0, 1fr) 180px;
+    grid-template-columns: minmax(0, 1fr) 220px;
   }
 }
-@media (max-width: 1199px) {
+@media screen and (max-width: 1199px) {
   #outline {
     display: none;
   }
@@ -574,7 +580,7 @@ article {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-@media (max-width: 700px) {
+@media screen and (max-width: 700px) {
   .catalog-toolbar {
     flex-direction: column;
     gap: 14px;
@@ -589,7 +595,7 @@ article {
     padding: 24px 20px;
   }
 }
-@media (max-width: 480px) {
+@media screen and (max-width: 480px) {
   header {
     align-items: flex-start;
     gap: 8px;
@@ -889,7 +895,7 @@ body > header {
 }
 
 /* The centered shell already provides outer whitespace on wide screens. */
-@media (min-width: 1280px) {
+@media screen and (min-width: 1280px) {
   body > header,
   body > main {
     padding-inline: 0;
@@ -904,12 +910,12 @@ body > header {
 }
 
 /* Keep the outline adjacent to the bounded reading column. */
-@media (min-width: 1200px) {
+@media screen and (min-width: 1200px) {
   .reading-layout:has(#outline:not([hidden])) {
-    grid-template-columns: minmax(0, 1fr) 180px;
+    grid-template-columns: minmax(0, 1fr) 220px;
     justify-content: center;
     column-gap: 32px;
-    padding: 24px clamp(24px, calc((100% - 1020px) / 4 + 24px), 80px);
+    padding: 32px;
   }
   .reading-layout:has(#outline:not([hidden])) > article {
     padding: 0;
@@ -919,20 +925,19 @@ body > header {
   }
 }
 
-@media (min-width: 1200px) {
-  .reading-layout:has(#outline:not([hidden])) #document,
-  .reading-layout:has(#outline:not([hidden])) #doc-head {
+@media screen and (min-width: 1200px) {
+  .reading-layout:has(#outline:not([hidden])) #document {
     max-width: none;
   }
 }
 
 /* Tool and document cards share the same responsive grid. */
-@media (min-width: 701px) and (max-width: 1199px) {
+@media screen and (min-width: 701px) and (max-width: 1199px) {
   .tools-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-@media (max-width: 700px) {
+@media screen and (max-width: 700px) {
   .tools-grid {
     grid-template-columns: 1fr;
   }
@@ -953,8 +958,10 @@ body > header {
 }
 .document-actions .back-button {
   margin: 0;
+  flex-shrink: 0;
 }
 .document-export {
+  flex-shrink: 0;
   position: relative;
 }
 .document-export summary {
@@ -996,11 +1003,12 @@ body > header {
 }
 @media print {
   @page {
-    margin: 16mm;
+    margin: 0;
   }
   body {
     display: block;
     min-width: 0;
+    min-height: 0;
     background: white;
   }
   body > header,
@@ -1034,8 +1042,10 @@ body > header {
     box-shadow: none;
     overflow: visible;
   }
-  #doc-head {
-    margin-bottom: 12px;
+  /* Repeat the inset on every printed fragment, including with no page margins. */
+  .reading-layout > article {
+    padding: 16mm;
+    box-decoration-break: clone;
   }
   #document {
     color: #111;
@@ -1048,6 +1058,8 @@ body > header {
   #document table {
     display: table;
     width: 100%;
+    table-layout: fixed;
+    overflow-wrap: anywhere;
     font-size: 10pt;
   }
   #document tr,
