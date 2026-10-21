@@ -71,7 +71,9 @@ export function createCatalog(
     generation++;
     queue.clear();
     observer.disconnect();
-    const entries = session.entries,
+    const entries = session.entries.filter(
+        (entry) => session.preview(entry.path)?.standalone !== false,
+      ),
       prefix = session.config.docsDir ? session.config.docsDir + '/' : '';
     const categories = [
       ...new Set(

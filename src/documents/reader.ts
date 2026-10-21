@@ -6,6 +6,7 @@ import {
 import { resolvePath } from './paths';
 import { isDocumentPath } from '../document-paths';
 import { extractPreview } from './preview';
+import { parseFrontMatter } from './front-matter';
 import type { DocumentSession } from './session';
 export interface ReaderElements {
   body: HTMLElement;
@@ -45,7 +46,7 @@ export function createReader(
       const markdown = await session.read(path);
       if (id !== generation) return;
       elements.path.textContent = path.split('/').join(' / ');
-      const fragment = markdownFragment(markdown);
+      const fragment = markdownFragment(parseFrontMatter(markdown).body);
       const images = [...fragment.querySelectorAll('img')].map((img) => {
         const src = img.getAttribute('src');
         img.removeAttribute('src');

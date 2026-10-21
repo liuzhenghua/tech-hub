@@ -59,15 +59,27 @@ test('summaries persist independently of bounded body cache and invalidate by SH
     cache.putPreview(item.path, item.sha, {
       title: item.path,
       text: 'summary',
+      standalone: false,
     });
     cache.put(item.path, item.sha, 'body', 'title');
   }
   cache = new DocumentCache(store, 'scope');
   assert.equal(cache.get('docs/0.md'), undefined);
   assert.equal(cache.preview('docs/0.md').text, 'summary');
+  assert.equal(cache.preview('docs/0.md').standalone, false);
   cache.index(
     entries.map((x) => (x.path === 'docs/0.md' ? { ...x, sha: 'changed' } : x)),
   );
   assert.equal(cache.preview('docs/0.md'), undefined);
   assert.equal(cache.preview('docs/1.md').text, 'summary');
+});
+
+test('legacy previews are rebuilt without discarding cached bodies', () => {
+  const store = storage();
+  const cache = new DocumentCache(store, 'scope');
+  cache.putPreview('docs/a.md', 'sha', { text: 'legacy' });
+  cache.put('docs/a.md', 'sha', '# A', 'A');
+  const restored = new DocumentCache(store, 'scope');
+  assert.equal(restored.preview('docs/a.md'), undefined);
+  assert.equal(restored.get('docs/a.md').markdown, '# A');
 });

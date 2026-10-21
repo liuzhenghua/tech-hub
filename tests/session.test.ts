@@ -50,7 +50,11 @@ test('remembered session restores summaries offline and invalidates changed SHA'
     async () => 'token',
   );
   assert.ok(await session.unlock('password', true));
-  session.record('docs/a.md', '# A', { title: 'A', text: 'summary' });
+  session.record('docs/a.md', '# A', {
+    title: 'A',
+    text: 'summary',
+    standalone: false,
+  });
   const restored = new DocumentSession(
     config,
     store,
@@ -59,6 +63,8 @@ test('remembered session restores summaries offline and invalidates changed SHA'
   );
   assert.equal(restored.restore(), 'password');
   assert.equal(restored.preview('docs/a.md')?.text, 'summary');
+  assert.equal(restored.preview('docs/a.md')?.standalone, false);
+  assert.equal(await restored.read('docs/a.md'), '# A');
   assert.equal(await restored.read('docs/a.md'), '# A');
   await restored.unlock('password', true);
   assert.equal(restored.preview('docs/a.md'), undefined);

@@ -1,8 +1,10 @@
 import { marked } from 'marked';
+import { parseFrontMatter } from './front-matter';
 import DOMPurify from 'dompurify';
 import type { Preview, DocumentEntry } from './types';
 export function extractPreview(markdown: string): Preview {
-  const tokens = marked.lexer(markdown.slice(0, 8000));
+  const metadata = parseFrontMatter(markdown);
+  const tokens = marked.lexer(metadata.body.slice(0, 8000));
   const heading = tokens.find(
     (token) => token.type === 'heading' && token.depth === 1,
   );
@@ -15,7 +17,10 @@ export function extractPreview(markdown: string): Preview {
     { ALLOWED_TAGS: [], ALLOWED_ATTR: [] },
   );
   return {
-    title: heading && 'text' in heading ? heading.text : undefined,
+    standalone: metadata.standalone,
+    title:
+      metadata.title ||
+      (heading && 'text' in heading ? heading.text : undefined),
     text: element.value.replace(/\s+/g, ' ').slice(0, 180),
   };
 }

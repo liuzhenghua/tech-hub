@@ -32,6 +32,9 @@ export class DocumentCache {
       ) {
         this.data = saved;
         this.data.previews ||= {};
+        for (const [path, preview] of Object.entries(this.data.previews))
+          if (typeof preview.standalone !== 'boolean')
+            delete this.data.previews[path];
         this.data.entries = saved.entries.filter((x) =>
           isDocumentPath(x.path, directory),
         );

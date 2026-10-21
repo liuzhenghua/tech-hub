@@ -9,6 +9,7 @@ export interface DocumentEntry {
   type?: string;
 }
 export interface Preview {
+  standalone?: boolean;
   title?: string;
   text: string;
   sha?: string;
