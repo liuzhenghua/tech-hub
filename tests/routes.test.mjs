@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { documentHash, parseRoute } from '../src/routes.js';
+import { documentHash, parseRoute } from '../src/routes.ts';
 test('document URLs round-trip nested and non-ASCII paths and sections', () => {
   const path = 'docs/agents/中文 帮助.md';
   assert.deepEqual(parseRoute(documentHash(path, '标题 & 示例')), {

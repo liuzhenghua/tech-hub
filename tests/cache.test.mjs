@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { DocumentCache } from '../src/cache.js';
+import { DocumentCache } from '../src/documents/cache.ts';
 const storage = () => {
   const values = new Map();
   return {
@@ -45,4 +45,29 @@ test('cache is bounded and tolerates unavailable storage', () => {
     blocked.index([]);
     blocked.clear();
   });
+});
+
+test('summaries persist independently of bounded body cache and invalidate by SHA', () => {
+  const store = storage();
+  let cache = new DocumentCache(store, 'scope');
+  const entries = Array.from({ length: 12 }, (_, i) => ({
+    path: `docs/${i}.md`,
+    sha: `sha-${i}`,
+  }));
+  cache.index(entries);
+  for (const item of entries) {
+    cache.putPreview(item.path, item.sha, {
+      title: item.path,
+      text: 'summary',
+    });
+    cache.put(item.path, item.sha, 'body', 'title');
+  }
+  cache = new DocumentCache(store, 'scope');
+  assert.equal(cache.get('docs/0.md'), undefined);
+  assert.equal(cache.preview('docs/0.md').text, 'summary');
+  cache.index(
+    entries.map((x) => (x.path === 'docs/0.md' ? { ...x, sha: 'changed' } : x)),
+  );
+  assert.equal(cache.preview('docs/0.md'), undefined);
+  assert.equal(cache.preview('docs/1.md').text, 'summary');
 });

@@ -1,7 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomBytes, pbkdf2Sync, createCipheriv } from 'node:crypto';
-import { unlockTokenBox, resolvePath, Repository } from '../src/core.js';
+import { Repository } from '../src/documents/repository.ts';
+import { unlockTokenBox } from '../src/documents/token.ts';
+import { resolvePath } from '../src/documents/paths.ts';
 test('pwa-apps compatible encrypted token unlocks and rejects wrong key', async () => {
   const salt = randomBytes(16),
     iv = randomBytes(12),

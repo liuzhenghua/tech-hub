@@ -1,8 +1,8 @@
 // Freeze computed presentation before moving SVG outside Mermaid's scoped container.
-function presentationClone(svg) {
-  const clone = svg.cloneNode(true);
-  const source = [svg, ...svg.querySelectorAll('*')];
-  const target = [clone, ...clone.querySelectorAll('*')];
+function presentationClone(svg: SVGSVGElement) {
+  const clone = svg.cloneNode(true) as SVGSVGElement;
+  const source = [svg, ...svg.querySelectorAll<SVGElement>('*')];
+  const target = [clone, ...clone.querySelectorAll<SVGElement>('*')];
   const properties = [
     'fill',
     'fill-opacity',
@@ -49,21 +49,24 @@ function presentationClone(svg) {
   clone.querySelectorAll('style').forEach((node) => node.remove());
   return clone;
 }
-function svgBlob(svg) {
+function svgBlob(svg: SVGSVGElement) {
   const clone = presentationClone(svg);
   const box = svg.viewBox.baseVal;
   clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-  clone.setAttribute('width', box.width || svg.getBoundingClientRect().width);
+  clone.setAttribute(
+    'width',
+    String(box.width || svg.getBoundingClientRect().width),
+  );
   clone.setAttribute(
     'height',
-    box.height || svg.getBoundingClientRect().height,
+    String(box.height || svg.getBoundingClientRect().height),
   );
   clone.style.maxWidth = 'none';
   return new Blob([new XMLSerializer().serializeToString(clone)], {
     type: 'image/svg+xml;charset=utf-8',
   });
 }
-async function pngBlob(svg) {
+async function pngBlob(svg: SVGSVGElement) {
   const url = URL.createObjectURL(svgBlob(svg));
   try {
     const image = new Image();
@@ -74,10 +77,11 @@ async function pngBlob(svg) {
     canvas.width = Math.max(1, Math.round(image.width * ratio));
     canvas.height = Math.max(1, Math.round(image.height * ratio));
     const context = canvas.getContext('2d');
+    if (!context) throw Error('当前浏览器无法创建图片画布');
     context.fillStyle = '#fff';
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    return await new Promise((resolve, reject) =>
+    return await new Promise<Blob>((resolve, reject) =>
       canvas.toBlob(
         (blob) => (blob ? resolve(blob) : reject(Error('无法生成图片'))),
         'image/png',
@@ -87,7 +91,7 @@ async function pngBlob(svg) {
     URL.revokeObjectURL(url);
   }
 }
-function download(svg) {
+function download(svg: SVGSVGElement) {
   const url = URL.createObjectURL(svgBlob(svg));
   const link = document.createElement('a');
   link.href = url;
@@ -95,7 +99,7 @@ function download(svg) {
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-async function enlarge(svg, source) {
+async function enlarge(source: string) {
   const dialog = document.createElement('dialog');
   dialog.className = 'diagram-dialog';
   const bar = document.createElement('div');
@@ -111,11 +115,11 @@ async function enlarge(svg, source) {
   let scale = 1,
     x = 0,
     y = 0,
-    pointer;
+    pointer: { x: number; y: number } | null = null;
   const update = () => {
     image.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
   };
-  const zoom = (factor) => {
+  const zoom = (factor: number) => {
     scale = Math.min(5, Math.max(0.25, scale * factor));
     update();
   };
@@ -131,7 +135,7 @@ async function enlarge(svg, source) {
       },
     ],
     ['关闭', () => dialog.close()],
-  ]) {
+  ] as Array<[string, () => void]>) {
     const button = document.createElement('button');
     button.textContent = name;
     button.onclick = action;
@@ -142,7 +146,7 @@ async function enlarge(svg, source) {
     zoom(event.deltaY < 0 ? 1.1 : 1 / 1.1);
   };
   viewport.onpointerdown = (event) => {
-    if (event.target.closest('a')) return;
+    if (event.target instanceof Element && event.target.closest('a')) return;
     pointer = { x: event.clientX - x, y: event.clientY - y };
     viewport.setPointerCapture(event.pointerId);
   };
@@ -161,7 +165,7 @@ async function enlarge(svg, source) {
   const previous = document.activeElement;
   dialog.onclose = () => {
     dialog.remove();
-    previous?.focus();
+    if (previous instanceof HTMLElement) previous.focus();
   };
   dialog.onclick = (event) => {
     if (event.target === dialog) dialog.close();
@@ -175,7 +179,7 @@ async function enlarge(svg, source) {
     );
     if (!dialog.isConnected) return;
     image.innerHTML = rendered.svg;
-    const result = image.querySelector('svg');
+    const result = image.querySelector('svg')!;
     result.style.maxWidth = 'none';
     result.style.width = '100%';
     result.style.height = '100%';
@@ -184,10 +188,13 @@ async function enlarge(svg, source) {
     image.textContent = '图表预览加载失败，请关闭后重试。';
   }
 }
-export function enhanceDiagrams(root, status) {
-  for (const diagram of root.querySelectorAll('.mermaid')) {
+export function enhanceDiagrams(
+  root: HTMLElement,
+  status: (message: string) => void,
+) {
+  for (const diagram of root.querySelectorAll<HTMLElement>('.mermaid')) {
     const svg = diagram.querySelector('svg');
-    if (!svg || diagram.parentElement.classList.contains('diagram-frame'))
+    if (!svg || diagram.parentElement!.classList.contains('diagram-frame'))
       continue;
     const frame = document.createElement('div');
     frame.className = 'diagram-frame';
@@ -195,7 +202,7 @@ export function enhanceDiagrams(root, status) {
     frame.append(diagram);
     const toolbar = document.createElement('div');
     toolbar.className = 'diagram-toolbar';
-    const action = (name, handler) => {
+    const action = (name: string, handler: () => void | Promise<void>) => {
       const button = document.createElement('button');
       const paths = name.includes('放大')
         ? '<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M3 3l6 6m12-6-6 6M3 21l6-6m12 6-6-6"/>'
@@ -217,7 +224,7 @@ export function enhanceDiagrams(root, status) {
       return button;
     };
     toolbar.append(
-      action('⤢ 放大', () => enlarge(svg, diagram.dataset.source || '')),
+      action('⤢ 放大', () => enlarge(diagram.dataset.source || '')),
       action('复制图片', async () => {
         await navigator.clipboard.write([
           new ClipboardItem({ 'image/png': pngBlob(svg) }),

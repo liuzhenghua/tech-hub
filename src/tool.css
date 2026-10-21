@@ -1,0 +1,418 @@
+/* Shared site tokens and controls come from style.css. */
+.tool-page {
+  --panel: var(--surface);
+  --text: var(--ink);
+  --link: var(--accent);
+  --code-bg: #f1f3ef;
+  --table-head: #edf0ea;
+}
+.tool-page main {
+  height: 100dvh;
+  min-height: 0;
+  flex: none;
+  max-width: 1440px;
+  padding: 16px 24px;
+  gap: 12px;
+}
+.tool-header {
+  position: static;
+  max-width: none;
+  padding: 0 0 12px;
+  margin: 0;
+  justify-content: flex-start;
+}
+.tool-header .back-button {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  line-height: 1.4;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.tool-header h1 {
+  line-height: 1.4;
+  font-size: 20px;
+  margin: 0;
+}
+.tool-header > span {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--muted);
+}
+.tool-page .editors {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  min-height: 180px;
+  height: 0;
+}
+.tool-page .editor {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+}
+.tool-page .editor.preview-expanded {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  border: 0;
+  border-radius: 0;
+}
+.tool-page .preview-expanded .markdown-body {
+  padding: 24px max(24px, calc((100vw - 1000px) / 2));
+}
+.tool-page .editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.tool-page[data-tool='digest'] .editors {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(180px, 1fr) 150px;
+}
+.tool-page .verification-panel {
+  flex-shrink: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  font-size: 12px;
+}
+.verification-panel summary {
+  cursor: pointer;
+  color: var(--accent);
+}
+.verification-panel p {
+  margin: 10px 0;
+}
+.verification-panel .actions {
+  margin-top: 10px;
+}
+.tool-page[data-tool='digest'] #aes-key {
+  width: 260px;
+}
+.tool-page .editor-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tool-page button,
+.tool-page select {
+  font-size: 12px;
+  min-height: 32px;
+  padding: 5px 10px;
+}
+.tool-page .editor-head button {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--line);
+}
+.tool-page textarea {
+  flex: 1;
+  display: block;
+  width: 100%;
+  border: 0;
+  resize: none;
+  padding: 16px;
+  min-height: 0;
+  background: transparent;
+  color: var(--ink);
+  font:
+    13px/1.8 ui-monospace,
+    SFMono-Regular,
+    monospace;
+}
+.tool-page textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.tool-page .bottom-toolbar,
+.tool-page .toolbar,
+.tool-page .actions,
+.tool-page .aes-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.tool-page .bottom-toolbar {
+  justify-content: space-between;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+}
+.tool-page .toolbar {
+  flex: 1;
+  min-width: 0;
+}
+.tool-page .option-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+.tool-page .option-tabs button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 6px 12px;
+}
+.tool-page .option-tabs button[aria-pressed='true'] {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: 0 1px 3px #243b281a;
+  font-weight: 600;
+}
+.tool-page #hint {
+  color: var(--muted);
+  font-size: 12px;
+}
+.tool-page .primary {
+  background: var(--accent);
+  color: white;
+}
+.tool-page footer {
+  flex-shrink: 0;
+  margin-top: 0;
+  padding: 8px 0 0;
+  font-size: 11px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  letter-spacing: 0;
+}
+.tool-page footer #hint {
+  flex: 1 1 320px;
+  font-size: 11px;
+}
+.tool-page footer #hint:empty {
+  display: none;
+}
+.tool-page #status {
+  margin: 0;
+  min-height: 0;
+}
+.tool-page #status:empty {
+  display: none;
+}
+.tool-page #status.error {
+  color: #b42318;
+}
+.tool-page #jwt-key-row {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tool-page #jwt-key-row > label {
+  font-size: 12px;
+  flex-basis: 100%;
+}
+.tool-page #jwt-key,
+.tool-page #rsa-key {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  min-height: 70px;
+  resize: vertical;
+  background: var(--surface);
+}
+.tool-page input {
+  min-width: 0;
+  max-width: 100%;
+}
+.tool-page .aes-controls label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.tool-page #jwt-info {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  font: 12px/1.6 monospace;
+  color: var(--muted);
+  white-space: pre-wrap;
+}
+.tool-page .json-tree {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+  font:
+    13px/1.8 ui-monospace,
+    monospace;
+}
+.tool-page .json-tree summary {
+  cursor: pointer;
+}
+.tool-page .json-children {
+  margin-left: 8px;
+  padding-left: 14px;
+  border-left: 1px solid var(--line);
+}
+.tool-page .json-key {
+  color: #245b9e;
+}
+.tool-page .json-string {
+  color: #367523;
+}
+.tool-page .json-number {
+  color: #9b5814;
+}
+.tool-page .json-boolean {
+  color: #7949a3;
+}
+.tool-page .json-meta,
+.tool-page .json-null {
+  color: var(--muted);
+}
+.markdown-body {
+  flex: 1;
+  overflow: auto;
+  padding: 20px;
+  overflow-wrap: anywhere;
+  font-size: 15px;
+  line-height: 1.85;
+}
+.markdown-body h1 {
+  font-size: 30px;
+}
+.markdown-body h2 {
+  font-size: 23px;
+}
+.markdown-body p {
+  color: var(--ink);
+}
+.markdown-body pre {
+  position: relative;
+  padding: 16px 48px 16px 16px;
+  border-radius: 7px;
+  background: #f1f3ef;
+  overflow: auto;
+  font-size: 13px;
+}
+.markdown-body pre code.hljs {
+  padding: 0;
+  background: transparent;
+  overflow: visible;
+}
+.markdown-body pre:hover .copy-code,
+.markdown-body pre:focus-within .copy-code {
+  opacity: 1;
+}
+.markdown-body table {
+  display: block;
+  overflow: auto;
+  border-collapse: collapse;
+}
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid var(--line);
+  padding: 8px 12px;
+}
+.markdown-body blockquote {
+  margin-left: 0;
+  border-left: 3px solid #9caf99;
+  padding-left: 18px;
+}
+.markdown-body a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.markdown-body svg {
+  max-width: 100%;
+}
+@media (max-width: 700px) {
+  .tool-page main {
+    height: auto;
+    min-height: 100dvh;
+    padding: 12px;
+  }
+  .tool-page .editors {
+    flex: none;
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .tool-page .editor {
+    min-height: 300px;
+  }
+  .tool-page[data-tool='digest'] .editors {
+    grid-template-rows: auto auto;
+  }
+  .tool-page[data-tool='digest'] .editor:last-child {
+    min-height: 160px;
+  }
+  .tool-header > span {
+    display: none;
+  }
+  .tool-header {
+    flex-wrap: wrap;
+  }
+}
+
+.tool-page #rsa-controls,
+.tool-page #sm2-controls,
+.tool-page .aes-controls {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  font-size: 12px;
+}
+.tool-page #sm2-controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.tool-page #sm2-controls label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.tool-page #rsa-controls > label {
+  display: inline-block;
+  margin: 4px 8px 6px 0;
+}
+.tool-page .editor-head {
+  min-height: 54px;
+}
+@media (max-width: 700px) {
+  .tool-page .bottom-toolbar {
+    align-items: flex-start;
+  }
+  .tool-page .toolbar,
+  .tool-page .actions {
+    flex-basis: 100%;
+  }
+  .tool-page .actions {
+    gap: 8px;
+  }
+  .tool-page .editor-controls {
+    justify-content: flex-end;
+  }
+  .tool-page .aes-controls label {
+    flex-wrap: wrap;
+  }
+  .tool-page #jwt-key {
+    flex-basis: 100%;
+  }
+}

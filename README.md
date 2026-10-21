@@ -1,6 +1,6 @@
 # 文档与工具
 
-通用文档与工具平台，提供浏览器工具和私有 GitHub 仓库的文档阅读入口。使用原生 JavaScript + Vite，无需后端。
+通用文档与工具平台，提供 JSON、Markdown 预览（支持 Mermaid）、JWT、摘要、字符串处理和加解密六类浏览器工具，以及私有 GitHub 仓库的文档阅读入口。使用TypeScript + Vite，无需后端。
 
 默认 GitHub Pages 访问地址：[https://liuzhenghua.github.io/tech-hub/](https://liuzhenghua.github.io/tech-hub/)。这是部署地址，实际可用性取决于发布状态。自行部署时，默认地址为 `https://<GitHub 用户名>.github.io/<网站仓库名>/`，与文档源仓库配置无关。
 
@@ -67,13 +67,13 @@ node --env-file=.env.token.local tools/encrypt-token.mjs
 
 文档页提供分类卡片、搜索和正文预览，点击进入详情。每篇文档有独立 URL，可刷新恢复；未解锁时先输入口令。支持 Markdown、Mermaid、相对文档链接及仓库内 PNG、JPEG、GIF、WebP 图片。代码块可复制，图表可放大、复制和下载。
 
-默认记住口令，口令、列表和最近阅读的正文以明文保存在当前浏览器 localStorage。再次进入先显示缓存，再后台解锁并检查更新；Token 仅留在内存。正文最多缓存 10 篇，每篇上限 150,000 字符，图片不缓存。文件 SHA 变化时正文缓存失效，切换仓库、目录或 Token 密文后不复用旧缓存。
+默认记住口令，口令、列表和最近阅读的正文以明文保存在当前浏览器 localStorage。再次进入先显示缓存，再后台解锁并检查更新；Token 仅留在内存。摘要单独缓存并记录文件 SHA；刷新目录后仅为新增、变更或尚无摘要的文档请求正文，未变更的摘要直接复用。正文最多缓存 10 篇，每篇上限 150,000 字符，图片不缓存。文件 SHA 变化时正文缓存失效，切换仓库、目录或 Token 密文后不复用旧缓存。
 
 不勾选记住口令时不保留文档缓存。点击“锁定”会清除口令、缓存和当前内容。网络失败时可阅读缓存正文，未缓存内容需要联网；浏览器存储不可用时仍可在线阅读。
 
 ### 访问边界
 
-- 目录按默认分支的同一个提交加载；搜索匹配路径、文件名及已读取的标题，不是全文搜索。摘要在卡片进入可视区域后加载。
+- 目录按默认分支的同一个提交加载；搜索匹配路径、文件名、已读取的标题及已加载或缓存的摘要，不是全文搜索；尚未加载的摘要不参与匹配。摘要在卡片进入可视区域后加载。
 - 外部图片不自动加载；非 Markdown 的仓库文件需在 GitHub 查看。GitHub 截断大型仓库目录时会提示错误。
 - Markdown 经 DOMPurify 清洗，Mermaid 使用 strict 模式。独立工具页不接收凭证。
 
@@ -88,6 +88,7 @@ Token 使用 PBKDF2-HMAC-SHA256（600,000 次迭代、16 字节随机 salt）派
 ## 开发与维护
 
 ```sh
+npm run typecheck        # TypeScript 严格类型检查
 npm test                 # 行为测试
 npm run format:check     # 格式检查；npm run format 自动整理
 npm run build            # 生产产物输出到 dist/
@@ -97,9 +98,15 @@ npm run preview          # 本地检查生产构建
 开发服务支持热更新，生产资源使用相对路径以兼容 Pages 仓库子路径。依赖由 `package-lock.json` 锁定；Mermaid 按需加载。
 
 - `src/`：页面、阅读器、API、缓存和凭证解锁；CSS 按布局与组件分区。
-- `public/tools/text-toolbox/`：独立工具快照及依赖许可证，更新时同步整个目录。
+- `src/tools/<工具>/index.html` 和 `main.ts`：六类工具各自的页面与脚本入口，通过 `tools/json/`、`tools/markdown/` 等路径访问。
+- `src/tools/<工具>/tool.ts`：工具定义；`transform.ts`：可独立测试的业务计算。加解密按算法族继续分模块。
+- `src/tools/shared/`：工具接口类型、编辑器、状态持久化、JSON 树及字节编解码；`src/tool.css`：编辑器布局。
+- `src/markdown.ts`：文档阅读器与 Markdown 工具共用的清洗、语法高亮、代码复制和 Mermaid 渲染；图表交互复用 `src/diagrams.ts`。
+- `public/tools/text-toolbox/`：保留旧版离线工具入口及算法依赖许可证，仅供旧版离线页面使用；新工具通过 npm 模块加载算法依赖。
 - `tools/`：Token 加密程序。
 - `tests/`：解锁、API、缓存和路由测试。
 - `vite.config.js`：开发服务与构建配置。
 
 文档协作遵循 [AGENTS.md](./AGENTS.md)。
+
+前端源码统一使用 TypeScript 严格检查。文档库的仓库访问、凭证解锁、缓存、会话、目录和阅读器分别位于 `src/documents/`；`src/app.ts` 只负责页面组装及路由协调。新增工具在独立目录定义 `ToolDefinition`，公共编辑器只通过接口调用工具，不导入具体工具的业务代码。

@@ -188,72 +188,118 @@ footer {
 }
 
 /* Tool cards: 1 / 2 / 3 columns */
+.tool-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(320px, 100%);
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--muted);
+}
+.tool-search:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.tool-search svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+.tool-search input {
+  min-width: 0;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  font-size: 13px;
+}
+.tool-search input:focus-visible {
+  outline: none;
+}
+.tool-empty {
+  padding: 36px 16px;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
 .tools-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 .tool {
   display: flex;
   flex-direction: column;
+  gap: 16px;
   min-width: 0;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 22px;
-  box-shadow: 0 4px 18px #243b2806;
+  border-radius: var(--radius);
+  padding: 24px;
   transition:
-    transform 0.18s,
-    border-color 0.18s,
-    box-shadow 0.18s;
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.tool h3 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
 }
 .tool-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
+  justify-content: flex-start;
+  gap: 14px;
+  margin-bottom: 0;
 }
 .tool-icon {
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 13px;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 12px;
   background: var(--surface-soft);
-  font: 23px monospace;
   color: var(--accent);
 }
-.tool-badge {
-  font-size: 11px;
-  color: var(--accent);
-  background: #f0f5ee;
-  padding: 3px 9px;
-  border-radius: 20px;
+.tool-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .tool p {
   flex: 1;
   font-size: 13px;
   line-height: 1.8;
-  margin: 8px 0 22px;
+  margin: 0;
+  min-height: 3.6em;
 }
-.tool-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  border-top: 1px solid #edf0ea;
-  padding-top: 15px;
-  font-size: 11px;
-  color: var(--muted);
-}
-.tool-open {
-  color: var(--accent);
-  font-size: 12px;
-  font-weight: 650;
+@media (max-width: 600px) {
+  #tools-page > .section-title {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .tool-search {
+    width: 100%;
+  }
+  .tool {
+    padding: 20px;
+  }
 }
 @media (hover: hover) {
   .tool:hover {
-    transform: translateY(-3px);
     border-color: #a9c3ae;
     box-shadow: 0 10px 26px #243b2812;
   }
@@ -333,10 +379,6 @@ footer {
   padding: 6px 12px;
   font-size: 12px;
 }
-.results-count {
-  margin: 0 0 14px;
-  font-size: 12px;
-}
 .document-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -374,7 +416,8 @@ footer {
   overflow-wrap: anywhere;
   flex: 1;
 }
-.document-card-footer {
+.document-card-footer,
+.tool-link {
   color: var(--accent);
   font-size: 11px;
   border-top: 1px solid #edf0ea;
@@ -412,14 +455,16 @@ article {
 #document {
   max-width: 760px;
   margin: 0;
+}
+:is(#document, .markdown-body) {
   color: var(--ink);
   font-size: 15px;
   line-height: 1.85;
 }
-#document p {
+:is(#document, .markdown-body) p {
   color: var(--ink);
 }
-#document > :first-child {
+:is(#document, .markdown-body) > :first-child {
   margin-top: 0;
 }
 #outline {
@@ -458,50 +503,50 @@ article {
 }
 
 /* Rendered Markdown, scoped to avoid affecting the shell */
-#document {
+:is(#document, .markdown-body) {
   overflow-wrap: anywhere;
 }
-#document h1 {
+:is(#document, .markdown-body) h1 {
   font-size: 30px;
   letter-spacing: -0.5px;
 }
-#document h2 {
+:is(#document, .markdown-body) h2 {
   font-size: 23px;
   margin-top: 32px;
 }
-#document a {
+:is(#document, .markdown-body) a {
   color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-#document pre {
+:is(#document, .markdown-body) pre {
   background: #f1f3ef;
   padding: 16px;
   overflow: auto;
   border-radius: 7px;
   font-size: 13px;
 }
-#document img,
-#document svg {
+:is(#document, .markdown-body) img,
+:is(#document, .markdown-body) svg {
   max-width: 100%;
   height: auto;
 }
-#document table {
+:is(#document, .markdown-body) table {
   display: block;
   overflow: auto;
   border-collapse: collapse;
 }
-#document th,
-#document td {
+:is(#document, .markdown-body) th,
+:is(#document, .markdown-body) td {
   border: 1px solid var(--line);
   padding: 8px 12px;
 }
-#document blockquote {
+:is(#document, .markdown-body) blockquote {
   border-left: 3px solid #9caf99;
   margin-left: 0;
   padding-left: 18px;
 }
-#document :where(h1, h2, h3, h4, h5, h6) {
+:is(#document, .markdown-body) :where(h1, h2, h3, h4, h5, h6) {
   scroll-margin-top: 16px;
 }
 
@@ -593,7 +638,8 @@ article {
 .document-card h3 {
   flex: initial;
 }
-.document-card-footer {
+.document-card-footer,
+.tool-link {
   margin-top: auto;
 }
 
@@ -630,7 +676,7 @@ body > header {
   background: var(--surface-soft);
   border-color: #b8c7b7;
 }
-#document :where(h1, h2, h3, h4, h5, h6) {
+:is(#document, .markdown-body) :where(h1, h2, h3, h4, h5, h6) {
   scroll-margin-top: 100px;
 }
 #outline {
@@ -638,7 +684,7 @@ body > header {
   max-height: calc(100dvh - 110px);
 }
 
-#document pre {
+:is(#document, .markdown-body) pre {
   position: relative;
   padding: 16px;
   padding-right: 48px;
@@ -659,8 +705,8 @@ body > header {
   opacity: 0;
   transition: opacity 0.15s;
 }
-#document pre:hover .copy-code,
-#document pre:focus-within .copy-code {
+:is(#document, .markdown-body) pre:hover .copy-code,
+:is(#document, .markdown-body) pre:focus-within .copy-code {
   opacity: 1;
 }
 @media (hover: none) {
@@ -850,7 +896,7 @@ body > header {
   }
 }
 
-#document pre > code.hljs {
+:is(#document, .markdown-body) pre > code.hljs {
   display: block;
   padding: 0;
   overflow: visible;
@@ -878,4 +924,22 @@ body > header {
   .reading-layout:has(#outline:not([hidden])) #doc-head {
     max-width: none;
   }
+}
+
+/* Tool and document cards share the same responsive grid. */
+@media (min-width: 701px) and (max-width: 1199px) {
+  .tools-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .tools-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tool-icon {
+  white-space: nowrap;
+  font-size: 12px;
+  flex-shrink: 0;
 }

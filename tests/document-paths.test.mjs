@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeDirectory, isDocumentPath } from '../src/document-paths.js';
-import { parseRoute, documentHash } from '../src/routes.js';
+import { normalizeDirectory, isDocumentPath } from '../src/document-paths.ts';
+import { parseRoute, documentHash } from '../src/routes.ts';
 test('root configuration includes top-level and nested Markdown and supports routes', () => {
   const root = normalizeDirectory('/');
   assert.equal(root, '');
