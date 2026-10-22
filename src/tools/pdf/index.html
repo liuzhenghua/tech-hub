@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PDF 工具 · 文档与工具</title>
+    <link rel="stylesheet" href="../../style.css" />
+    <link rel="stylesheet" href="../../tool.css" />
+  </head>
+  <body class="tool-page" data-tool="pdf">
+    <main class="pdf-main">
+      <header class="tool-header">
+        <a href="../../#tools" class="back-button">← 全部工具</a>
+        <h1>PDF 工具</h1>
+        <span>浏览器本地处理</span>
+      </header>
+      <div class="bottom-toolbar">
+        <div class="toolbar">
+          <label for="pdf-mode">操作</label
+          ><select id="pdf-mode">
+            <option value="split">PDF 转图片</option>
+            <option value="merge">图片转 PDF</option>
+          </select>
+        </div>
+        <span id="mode-hint">选择 PDF，勾选需要保存的页面</span>
+      </div>
+      <section id="split-panel" class="editor pdf-workspace">
+        <div class="editor-head">
+          <span id="pdf-name">PDF 页面</span>
+          <div class="editor-controls">
+            <button id="pick-pdf">选择 PDF</button
+            ><button id="clear-pdf" disabled>清空</button>
+          </div>
+        </div>
+        <div id="pdf-drop" class="pdf-content">
+          <div id="pdf-pages" class="pdf-pages"></div>
+          <button id="pdf-empty" class="pdf-drop-zone">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 3h7l4 4v14H6V3h1Zm7 0v5h4M9 13h6m-6 4h6" /></svg
+            ><strong>点击选择 PDF，或拖放到这里</strong
+            ><span>预览全部页面，自由选择需要导出的图片</span>
+          </button>
+        </div>
+        <div class="pdf-actions">
+          <label><input id="select-all" type="checkbox" disabled /> 全选</label
+          ><span id="selection-count">未选择页面</span>
+          <label for="export-dpi">导出清晰度</label>
+          <select id="export-dpi">
+            <option value="150">标准 · 150 DPI</option>
+            <option value="300" selected>高清 · 300 DPI</option>
+            <option value="600">超清 · 600 DPI</option>
+          </select>
+          <button id="download-selected" class="primary" disabled>
+            下载所选图片
+          </button>
+        </div>
+      </section>
+      <section id="merge-panel" class="editor pdf-workspace" hidden>
+        <div class="editor-head">
+          <span id="image-count">图片列表</span>
+          <div class="editor-controls">
+            <button id="pick-images">添加图片</button
+            ><button id="clear-images" disabled>清空</button>
+          </div>
+        </div>
+        <div id="image-drop" class="pdf-content">
+          <ol id="image-list" class="image-list"></ol>
+          <button id="image-empty" class="pdf-drop-zone">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8" cy="8" r="2" />
+              <path d="m3 17 6-6 4 4 3-3 5 5" /></svg
+            ><strong>点击添加图片，或拖放到这里</strong
+            ><span>支持 JPG、PNG、WebP · 按列表顺序合并为 PDF</span>
+          </button>
+        </div>
+        <div class="pdf-actions">
+          <span>拖动图片或使用箭头调整页面顺序</span
+          ><button id="make-pdf" class="primary" disabled>
+            合并并下载 PDF
+          </button>
+        </div>
+      </section>
+      <input id="pdf-file" type="file" accept="application/pdf,.pdf" hidden />
+      <input
+        id="image-files"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        multiple
+        hidden
+      />
+      <p id="status" class="pdf-status" role="status" aria-live="polite"></p>
+      <footer>
+        <span>文件仅在当前浏览器中处理，不上传、不保存</span
+        ><span>PNG 图片 · PDF 文档</span>
+      </footer>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

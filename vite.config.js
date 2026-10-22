@@ -15,7 +15,7 @@ export default defineConfig({
       input: {
         main: fileURLToPath(new URL('./src/index.html', import.meta.url)),
         ...Object.fromEntries(
-          ['json', 'markdown', 'jwt', 'digest', 'strings', 'crypto'].map(
+          ['json', 'markdown', 'jwt', 'digest', 'strings', 'crypto', 'pdf'].map(
             (name) => [
               name,
               fileURLToPath(
