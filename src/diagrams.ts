@@ -190,7 +190,7 @@ async function enlarge(source: string) {
 }
 export function enhanceDiagrams(
   root: HTMLElement,
-  status: (message: string) => void,
+  status: (message: string, duration?: number) => void,
 ) {
   for (const diagram of root.querySelectorAll<HTMLElement>('.mermaid')) {
     const svg = diagram.querySelector('svg');
@@ -229,7 +229,7 @@ export function enhanceDiagrams(
         await navigator.clipboard.write([
           new ClipboardItem({ 'image/png': pngBlob(svg) }),
         ]);
-        status('图表图片已复制。');
+        status('图表图片已复制。', 3000);
       }),
     );
     const more = document.createElement('details');
@@ -244,7 +244,7 @@ export function enhanceDiagrams(
       action('复制源码', async () => {
         await navigator.clipboard.writeText(diagram.dataset.source || '');
         more.open = false;
-        status('Mermaid 源码已复制。');
+        status('Mermaid 源码已复制。', 3000);
       }),
       action('下载 SVG', () => {
         download(svg);

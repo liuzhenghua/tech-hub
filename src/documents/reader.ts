@@ -16,7 +16,7 @@ export interface ReaderElements {
 export function createReader(
   elements: ReaderElements,
   session: DocumentSession,
-  status: (text: string) => void,
+  status: (text: string, duration?: number) => void,
   open: (path: string, anchor?: string) => void,
 ) {
   let generation = 0;

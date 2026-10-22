@@ -344,6 +344,19 @@ footer {
   font-size: 13px;
   color: var(--accent);
 }
+#status.status-transient {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 100;
+  max-width: calc(100vw - 48px);
+  margin: 0;
+  padding: 12px 18px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--surface, #fff);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 10%);
+}
 #status:empty {
   display: none;
 }

@@ -24,8 +24,13 @@ const session = new DocumentSession(config, storage);
 let current = '',
   unlocking = 0,
   disposed = false;
-const status = (text: string) => {
-  element('status').textContent = text;
+let statusTimer: ReturnType<typeof setTimeout> | undefined;
+const status = (text: string, duration = 0) => {
+  clearTimeout(statusTimer);
+  const node = element('status');
+  node.textContent = text;
+  node.classList.toggle('status-transient', Boolean(text && duration));
+  if (text && duration) statusTimer = setTimeout(() => status(''), duration);
 };
 const reader = createReader(
   {
@@ -75,6 +80,7 @@ function unlockedView() {
 }
 function navigate() {
   if (location.hash === '#main-content') return;
+  status('');
   const route = parseRoute(location.hash, config.docsDir);
   element('tools-page').hidden = route.docs;
   element('library').hidden = !route.docs;
@@ -185,6 +191,7 @@ if (saved) {
 navigate();
 function dispose() {
   disposed = true;
+  clearTimeout(statusTimer);
   unlocking++;
   events.abort();
   disposeTools();
