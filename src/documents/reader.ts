@@ -21,13 +21,13 @@ export function createReader(
 ) {
   let generation = 0;
   let loaded: { path: string; markdown: string } | null = null;
-  const exportButtons = document.querySelectorAll<HTMLButtonElement>(
-    '#export-markdown,#export-pdf',
+  const actionButtons = document.querySelectorAll<HTMLButtonElement>(
+    '#copy-markdown,#export-markdown,#export-pdf',
   );
   const urls: string[] = [];
   function clear() {
     loaded = null;
-    exportButtons.forEach((button) => {
+    actionButtons.forEach((button) => {
       button.disabled = true;
     });
     generation++;
@@ -160,7 +160,7 @@ export function createReader(
       }
       if (id !== generation) return;
       loaded = { path, markdown };
-      exportButtons.forEach((button) => {
+      actionButtons.forEach((button) => {
         button.disabled = false;
       });
       if (anchor)

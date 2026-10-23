@@ -964,6 +964,7 @@ body > header {
 
 .document-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
@@ -973,10 +974,16 @@ body > header {
   margin: 0;
   flex-shrink: 0;
 }
+.copy-markdown {
+  flex-shrink: 0;
+  margin-left: auto;
+  white-space: nowrap;
+}
 .document-export {
   flex-shrink: 0;
   position: relative;
 }
+.copy-markdown,
 .document-export summary {
   cursor: pointer;
   list-style: none;

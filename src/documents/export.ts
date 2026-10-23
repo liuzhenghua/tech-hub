@@ -1,9 +1,26 @@
-/** Export the current loaded source or print the already rendered document. */
+/** Copy/export the loaded source or print the already rendered document. */
 export function mountDocumentExport(
   snapshot: () => { path: string; markdown: string } | null,
+  status: (text: string, duration?: number) => void,
 ): () => void {
   const menu = document.querySelector<HTMLDetailsElement>('#document-export')!;
   const events = new AbortController();
+  document.getElementById('copy-markdown')!.addEventListener(
+    'click',
+    async () => {
+      const current = snapshot();
+      if (!current) return;
+      try {
+        await navigator.clipboard.writeText(current.markdown);
+        if (!events.signal.aborted && snapshot() === current)
+          status('已复制 Markdown 全文。', 2000);
+      } catch {
+        if (!events.signal.aborted && snapshot() === current)
+          status('复制失败，请允许剪贴板访问，或导出 Markdown 文件。', 4000);
+      }
+    },
+    { signal: events.signal },
+  );
   document.getElementById('export-markdown')!.addEventListener(
     'click',
     () => {

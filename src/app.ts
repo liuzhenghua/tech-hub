@@ -148,7 +148,7 @@ async function unlock(passphrase: string, save: boolean) {
 }
 const events = new AbortController();
 const disposeTools = mountToolCatalog(element('tools-page'));
-const disposeExport = mountDocumentExport(reader.snapshot);
+const disposeExport = mountDocumentExport(reader.snapshot, status);
 form.addEventListener(
   'submit',
   (event) => {
