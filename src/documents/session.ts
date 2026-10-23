@@ -1,6 +1,9 @@
 import { Repository } from './repository';
 import { unlockTokenBox } from './token';
 import { DocumentCache } from './cache';
+import { documentGroups } from './groups';
+import { buildDocumentIndex } from './indexer';
+import { extractPreview } from './preview';
 import type {
   BrowserStorage,
   DocumentEntry,
@@ -15,6 +18,8 @@ export class DocumentSession {
   readonly previews = new Map<string, Preview>();
   private generation = 0;
   private remember = false;
+  private indexTask: { generation: number; promise: Promise<string[]> } | null =
+    null;
   readonly cache: DocumentCache | null;
   constructor(
     readonly config: RepositoryConfig & { tokenBox: string },
@@ -95,6 +100,33 @@ export class DocumentSession {
       this.cache?.put(path, sha, markdown, preview.title || path);
     }
   }
+  buildIndex(): Promise<string[]> {
+    if (this.indexTask?.generation === this.generation)
+      return this.indexTask.promise;
+    const generation = this.generation;
+    const source = this.source;
+    const promise = buildDocumentIndex(
+      this.entries,
+      (path) => this.preview(path),
+      (path) => this.read(path),
+      (path, markdown) => this.record(path, markdown, extractPreview(markdown)),
+      () => generation === this.generation && source === this.source,
+    ).finally(() => {
+      if (this.indexTask?.promise === promise) this.indexTask = null;
+    });
+    this.indexTask = { generation, promise };
+    return promise;
+  }
+  groups() {
+    return documentGroups(this.entries, (path) => this.preview(path));
+  }
+  groupFor(path: string) {
+    return this.groups().find(
+      (group) =>
+        group.entry.path === path ||
+        group.children.some((child) => child.path === path),
+    );
+  }
   lock() {
     this.generation++;
     this.source?.close();
@@ -106,6 +138,12 @@ export class DocumentSession {
     try {
       this.storage?.removeItem(PASSPHRASE_KEY);
     } catch {}
+  }
+  get remembersPassphrase() {
+    return this.remember;
+  }
+  cancelPending() {
+    this.generation++;
   }
   dispose() {
     this.generation++;

@@ -1,0 +1,79 @@
+<section id="library">
+  <div class="section-title">
+    <h2>私有文档库</h2>
+    <span id="total">私有文档</span>
+  </div>
+  <form id="unlock">
+    <div>
+      <h3>用你的口令，打开知识库。</h3>
+      <p>在当前浏览器解密访问凭证，直接读取私有仓库。</p>
+    </div>
+    <label for="secret">解密口令</label>
+    <div class="unlock-row">
+      <input
+        id="secret"
+        type="password"
+        autocomplete="off"
+        required
+        placeholder="输入云端访问口令"
+      /><button id="submit">解锁文档</button>
+    </div>
+    <label class="remember"
+      ><input id="remember" type="checkbox" checked />在此设备记住口令</label
+    >
+  </form>
+  <p id="status" role="status" aria-live="polite"></p>
+  <div id="workspace" hidden>
+    <div id="doc-catalog">
+      <div class="catalog-toolbar">
+        <div id="categories" aria-label="文档分类"></div>
+        <input
+          id="search"
+          type="search"
+          placeholder="搜索文档及子文档全文…"
+          aria-label="搜索文档"
+        />
+      </div>
+      <div id="files" class="document-grid" aria-label="文档列表"></div>
+    </div>
+    <div id="doc-detail" hidden>
+      <div class="document-actions">
+        <button id="back-to-docs" class="back-button">← 返回文档</button>
+        <div id="doc-head"></div>
+        <button id="copy-markdown" class="copy-markdown" disabled>
+          复制 Markdown
+        </button>
+        <details id="document-export" class="document-export">
+          <summary>导出 ▾</summary>
+          <div class="export-options">
+            <button id="export-markdown" disabled>当前文档（.md）</button>
+            <button id="export-bundle" disabled>包含子文档（.zip）</button>
+            <button id="export-pdf" disabled>
+              当前文档 PDF（打印 / 另存为）
+            </button>
+          </div>
+        </details>
+      </div>
+      <dialog
+        id="bundle-failures"
+        class="bundle-failures"
+        aria-labelledby="bundle-failures-title"
+      >
+        <h2 id="bundle-failures-title">部分文件未能收录</h2>
+        <p>可以重试，或导出已有内容。继续导出会在 ZIP 中附上缺失清单。</p>
+        <ul id="bundle-missing"></ul>
+        <div class="bundle-failure-actions">
+          <button id="bundle-cancel" type="button">取消</button>
+          <button id="bundle-retry" type="button">重试</button>
+          <button id="bundle-continue" type="button">导出已有内容</button>
+        </div>
+      </dialog>
+      <div class="reading-layout">
+        <article>
+          <div id="document"></div>
+        </article>
+        <aside id="outline" aria-label="本页目录" hidden></aside>
+      </div>
+    </div>
+  </div>
+</section>

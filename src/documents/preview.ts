@@ -18,6 +18,7 @@ export function extractPreview(markdown: string): Preview {
   );
   return {
     standalone: metadata.standalone,
+    searchText: metadata.body,
     title:
       metadata.title ||
       (heading && 'text' in heading ? heading.text : undefined),
@@ -38,7 +39,12 @@ export function matchesDocument(
 ): boolean {
   return (
     (!category || categoryOf(entry.path, directory) === category) &&
-    [entry.path, preview?.title || '', preview?.text || '']
+    [
+      entry.path,
+      preview?.title || '',
+      preview?.text || '',
+      preview?.searchText || '',
+    ]
       .join(' ')
       .toLowerCase()
       .includes(query.trim().toLowerCase())

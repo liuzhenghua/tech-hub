@@ -1,0 +1,119 @@
+<section id="tools-page" class="tool-section">
+  <div class="section-title">
+    <h2>常用工具</h2>
+    <label class="tool-search">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="10.5" cy="10.5" r="6.5" />
+        <path d="m16 16 4 4" />
+      </svg>
+      <input
+        id="tool-search"
+        type="search"
+        aria-label="搜索工具"
+        placeholder="搜索工具、用途或算法…"
+      />
+    </label>
+  </div>
+  <div class="tools-grid">
+    <a
+      class="tool"
+      data-keywords="json format 格式化 压缩 修复"
+      href="tools/json/"
+      ><div class="tool-top">
+        <span class="tool-icon" aria-hidden="true"
+          ><svg viewBox="0 0 24 24">
+            <path d="M8 4H6v6l-2 2 2 2v6h2M16 4h2v6l2 2-2 2v6h-2" /></svg
+        ></span>
+        <h3>JSON 工具</h3>
+      </div>
+      <p>格式化、压缩和修复 JSON，支持可折叠树形查看。</p>
+      <span class="tool-link">打开工具 ↗</span></a
+    ><a
+      class="tool"
+      data-keywords="markdown mermaid md 文档 流程图 图表 预览"
+      href="tools/markdown/"
+      ><div class="tool-top">
+        <span class="tool-icon" aria-hidden="true"
+          ><svg viewBox="0 0 24 24">
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <path d="M6 15V9l3 3 3-3v6m3-3 2 3 2-3m-2-3v6" /></svg
+        ></span>
+        <h3>Markdown 预览</h3>
+      </div>
+      <p>实时预览 Markdown 与 Mermaid，支持全屏阅读和复制。</p>
+      <span class="tool-link">打开工具 ↗</span></a
+    ><a
+      class="tool"
+      data-keywords="jwt token decode 令牌 签名 解析"
+      href="tools/jwt/"
+      ><div class="tool-top">
+        <span class="tool-icon" aria-hidden="true"
+          ><svg viewBox="0 0 24 24">
+            <path d="m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7l8-4Z" />
+            <path d="m8 12 3 3 5-6" /></svg
+        ></span>
+        <h3>JWT 解析</h3>
+      </div>
+      <p>解析 Header 和 Payload，查看时间与校验签名。</p>
+      <span class="tool-link">打开工具 ↗</span></a
+    ><a
+      class="tool"
+      data-keywords="digest hash md5 sha sha256 sha512 hmac sm3 哈希 摘要 散列"
+      href="tools/digest/"
+      ><div class="tool-top">
+        <span class="tool-icon" aria-hidden="true"
+          ><svg viewBox="0 0 24 24">
+            <path d="m9 3-3 18M18 3l-3 18M3 9h18M2 15h18" /></svg
+        ></span>
+        <h3>摘要工具</h3>
+      </div>
+      <p>MD5、SHA、SM3 与 HMAC 消息认证码。</p>
+      <span class="tool-link">打开工具 ↗</span></a
+    ><a
+      class="tool"
+      data-keywords="string base64 encode decode escape 字符串 转义 编码 解码"
+      href="tools/strings/"
+      ><div class="tool-top">
+        <span class="tool-icon" aria-hidden="true"
+          ><svg viewBox="0 0 24 24">
+            <path d="m7 7-4 5 4 5m10-10 4 5-4 5M14 4l-4 16" /></svg
+        ></span>
+        <h3>字符串处理</h3>
+      </div>
+      <p>Base64 编解码、转义、反转义和引号转换。</p>
+      <span class="tool-link">打开工具 ↗</span></a
+    ><a
+      class="tool"
+      data-keywords="crypto encrypt decrypt aes rsa sm2 sm4 des 3des 加密 解密"
+      href="tools/crypto/"
+      ><div class="tool-top">
+        <span class="tool-icon" aria-hidden="true"
+          ><svg viewBox="0 0 24 24">
+            <rect x="5" y="10" width="14" height="11" rx="2" />
+            <path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2" /></svg
+        ></span>
+        <h3>加解密工具</h3>
+      </div>
+      <p>AES、RSA、SM2、SM4、DES 与 3DES。</p>
+      <span class="tool-link">打开工具 ↗</span></a
+    >
+    <a
+      class="tool"
+      data-keywords="pdf 图片 png 拆分 合并 导出"
+      href="tools/pdf/"
+      ><div class="tool-top">
+        <span class="tool-icon" aria-hidden="true"
+          ><svg viewBox="0 0 24 24">
+            <path d="M6 3h8l4 4v14H6z" />
+            <path d="M14 3v5h5M8 13h8M8 17h8" /></svg
+        ></span>
+        <h3>PDF 工具</h3>
+      </div>
+      <p>将 PDF 页面导出为图片，或把多张图片合并为 PDF。</p>
+      <span class="tool-link">打开工具 ↗</span></a
+    >
+  </div>
+  <p id="tool-empty" class="tool-empty" role="status" hidden>
+    没有匹配的工具，试试其他关键词。
+  </p>
+</section>

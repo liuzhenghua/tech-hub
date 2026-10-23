@@ -121,3 +121,33 @@ test('failed refresh preserves existing readable session and non-remembered acce
   session.dispose();
   assert.equal(session.source, null);
 });
+
+test('leaving a route invalidates pending unlock while keeping the active session and remember preference', async () => {
+  const first = source([{ path: 'docs/a.md', sha: 'one' }]);
+  let next = first;
+  const session = new DocumentSession(
+    config,
+    storage(),
+    () => next,
+    async () => 'token',
+  );
+  await session.unlock('secret', false);
+  assert.equal(session.remembersPassphrase, false);
+  next = source([]);
+  let resolve!: (entries: DocumentEntry[]) => void;
+  next.list = () =>
+    new Promise((done) => {
+      resolve = done;
+    });
+  const pending = session.unlock('secret', true);
+  await Promise.resolve();
+  session.cancelPending();
+  resolve([{ path: 'docs/b.md', sha: 'two' }]);
+  assert.equal(await pending, false);
+  assert.equal(session.source, first);
+  assert.equal(first.closed, false);
+  assert.equal(next.closed, true);
+  assert.equal(session.remembersPassphrase, false);
+  assert.equal(await session.read('docs/a.md'), '# docs/a.md');
+  session.dispose();
+});

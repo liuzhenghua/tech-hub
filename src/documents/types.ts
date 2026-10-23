@@ -9,6 +9,7 @@ export interface DocumentEntry {
   type?: string;
 }
 export interface Preview {
+  searchText?: string;
   standalone?: boolean;
   title?: string;
   text: string;

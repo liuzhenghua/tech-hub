@@ -1,5 +1,8 @@
 import type { DocumentSession } from './session';
-import { categoryOf, extractPreview, matchesDocument } from './preview';
+import type { DocumentGroup } from './groups';
+import { matchingGroupDocuments } from './groups';
+import { categoryOf } from './preview';
+
 export interface CatalogElements {
   categories: HTMLElement;
   search: HTMLInputElement;
@@ -14,72 +17,62 @@ export function createCatalog(
   let category = '',
     disposed = false,
     generation = 0,
-    running = 0;
-  const queue = new Set<HTMLElement>(),
-    pending = new Set<string>(),
-    failed = new Set<string>();
-  const observer = new IntersectionObserver(
-    (items) => {
-      for (const item of items)
-        if (item.isIntersecting) queue.add(item.target as HTMLElement);
-      pump();
-    },
-    { rootMargin: '150px' },
-  );
-  async function load(card: HTMLElement) {
-    const path = card.dataset.path!;
-    const source = session.source,
-      token = generation;
-    running++;
-    pending.add(path);
-    observer.unobserve(card);
-    try {
-      const markdown = await session.read(path);
-      if (disposed || token !== generation || source !== session.source) return;
-      session.record(path, markdown, extractPreview(markdown));
-      if (card.isConnected) paint(card, path);
-    } catch {
-      if (token === generation) failed.add(path);
-      if (card.isConnected)
-        card.querySelector('.document-excerpt')!.textContent =
-          '打开查看完整文档';
-    } finally {
-      running--;
-      pending.delete(path);
-      pump();
-    }
-  }
-  function pump() {
-    if (disposed || !session.source) return;
-    for (const card of queue) {
-      if (running >= 3) break;
-      const path = card.dataset.path!;
-      if (pending.has(path)) continue;
-      queue.delete(card);
-      if (!card.isConnected || session.preview(path) || failed.has(path))
-        continue;
-      void load(card);
-    }
-  }
-  function paint(card: HTMLElement, path: string) {
+    indexing = false;
+  let failures: string[] = [];
+  const events = new AbortController();
+  function cardFor(group: DocumentGroup, query: string) {
+    const path = group.entry.path;
     const preview = session.preview(path);
-    if (preview?.title) card.querySelector('h3')!.textContent = preview.title;
-    card.querySelector('.document-excerpt')!.textContent =
-      preview?.text || '打开查看完整文档';
+    const card = document.createElement('button');
+    card.className = 'document-card';
+    card.dataset.path = path;
+    const parts = path.split('/');
+    const name = parts.pop()!.replace(/\.md$/i, '');
+    const tag = document.createElement('small');
+    tag.textContent = parts.join(' / ');
+    const title = document.createElement('h3');
+    title.textContent =
+      preview?.title ||
+      (name.toLowerCase() === 'readme'
+        ? (parts.at(-1) || session.config.repo) + ' · 概览'
+        : name);
+    const excerpt = document.createElement('p');
+    excerpt.className = 'document-excerpt';
+    excerpt.textContent = preview?.text || '打开查看完整文档';
+    const footer = document.createElement('span');
+    footer.className = 'document-card-footer';
+    footer.textContent = group.children.length
+      ? `阅读文档 ↗ · ${group.children.length} 篇子文档`
+      : '阅读文档 ↗';
+    card.append(tag, title, excerpt);
+    const matches = matchingGroupDocuments(
+      group,
+      (path) => session.preview(path),
+      query,
+    ).filter((entry) => entry.path !== path);
+    if (matches.length) {
+      const hint = document.createElement('p');
+      hint.className = 'document-match';
+      hint.textContent =
+        '命中子文档：' +
+        matches
+          .map(
+            (entry) =>
+              session.preview(entry.path)?.title || entry.path.split('/').pop(),
+          )
+          .join('、');
+      card.append(hint);
+    }
+    card.append(footer);
+    card.onclick = () => open(path);
+    return card;
   }
-  function render() {
-    generation++;
-    queue.clear();
-    observer.disconnect();
-    const entries = session.entries.filter(
-        (entry) => session.preview(entry.path)?.standalone !== false,
-      ),
-      prefix = session.config.docsDir ? session.config.docsDir + '/' : '';
+  function renderCategories(groups: DocumentGroup[]) {
+    const directory = session.config.docsDir || '';
+    const prefix = directory ? directory + '/' : '';
     const categories = [
       ...new Set(
-        entries.map((entry) =>
-          categoryOf(entry.path, session.config.docsDir || ''),
-        ),
+        groups.map((group) => categoryOf(group.entry.path, directory)),
       ),
     ];
     if (category && !categories.includes(category)) category = '';
@@ -99,64 +92,100 @@ export function createCatalog(
       };
       elements.categories.append(button);
     }
+  }
+  function renderFailures() {
+    if (!failures.length) return;
+    const notice = document.createElement('div');
+    notice.className = 'document-index-notice';
+    const summary = document.createElement('div');
+    summary.className = 'document-index-summary';
+    const message = document.createElement('span');
+    message.textContent = `${failures.length} 篇文档暂未更新，搜索结果可能不完整。`;
+    const retry = document.createElement('button');
+    retry.type = 'button';
+    retry.textContent = '重试';
+    retry.onclick = () => void index();
+    summary.append(message, retry);
+    const details = document.createElement('details');
+    const label = document.createElement('summary');
+    label.textContent = '查看详情';
+    const list = document.createElement('ul');
+    for (const path of failures) {
+      const item = document.createElement('li');
+      item.textContent = path;
+      list.append(item);
+    }
+    details.append(label, list);
+    notice.append(summary, details);
+    elements.files.prepend(notice);
+  }
+
+  function render() {
+    if (disposed) return;
+    elements.files.replaceChildren();
+    elements.files.setAttribute('aria-busy', String(indexing));
+    const groups = session
+      .groups()
+      .filter((group) => session.preview(group.entry.path));
+    renderCategories(groups);
     const query = elements.search.value;
-    const items = entries.filter((entry) =>
-      matchesDocument(
-        entry,
-        session.preview(entry.path),
-        query,
-        category,
-        session.config.docsDir || '',
-      ),
+    const items = groups.filter(
+      (group) =>
+        (!category ||
+          categoryOf(group.entry.path, session.config.docsDir || '') ===
+            category) &&
+        (!query.trim() ||
+          matchingGroupDocuments(group, (path) => session.preview(path), query)
+            .length > 0),
     );
     elements.total.textContent =
       category || query
-        ? `${items.length} / ${entries.length} 篇文档`
-        : `${entries.length} 篇文档`;
-    elements.files.replaceChildren();
-    for (const entry of items) {
-      const card = document.createElement('button');
-      card.className = 'document-card';
-      card.dataset.path = entry.path;
-      const parts = entry.path.split('/'),
-        name = parts.pop()!.replace(/\.md$/i, '');
-      const tag = document.createElement('small');
-      tag.textContent = parts.join(' / ');
-      const title = document.createElement('h3');
-      title.textContent =
-        session.preview(entry.path)?.title ||
-        (name.toLowerCase() === 'readme'
-          ? (parts.at(-1) || session.config.repo) + ' · 概览'
-          : name);
-      const excerpt = document.createElement('p');
-      excerpt.className = 'document-excerpt';
-      excerpt.textContent =
-        session.preview(entry.path)?.text || '正在加载摘要…';
-      const footer = document.createElement('span');
-      footer.className = 'document-card-footer';
-      footer.textContent = '阅读文档 ↗';
-      card.append(tag, title, excerpt, footer);
-      card.onclick = () => open(entry.path);
-      elements.files.append(card);
-      if (!session.preview(entry.path)) observer.observe(card);
-    }
-    if (!items.length) elements.files.textContent = '没有匹配的文档。';
+        ? `${items.length} / ${groups.length} 篇主文档`
+        : `${groups.length} 篇主文档`;
+    if (indexing) elements.total.textContent += ' · 更新中';
+    for (const group of items) elements.files.append(cardFor(group, query));
+    if (!items.length)
+      elements.files.textContent = indexing
+        ? '正在加载文档…'
+        : '没有匹配的文档。';
+    renderFailures();
   }
-  const search = () => render();
-  elements.search.addEventListener('input', search);
+  async function index() {
+    const id = ++generation;
+    failures = [];
+    if (!session.source) {
+      indexing = false;
+      render();
+      return;
+    }
+    indexing = true;
+    render();
+    try {
+      const missing = await session.buildIndex();
+      if (disposed || id !== generation) return;
+      failures = missing;
+    } catch (error) {
+      if (disposed || id !== generation) return;
+      failures =
+        error instanceof Error && error.name === 'AbortError'
+          ? []
+          : session.entries.map((entry) => entry.path);
+    }
+    if (disposed || id !== generation) return;
+    indexing = false;
+    render();
+  }
+  elements.search.addEventListener('input', render, { signal: events.signal });
   return {
     render,
     reset() {
-      failed.clear();
       category = '';
-      render();
+      void index();
     },
     dispose() {
       disposed = true;
       generation++;
-      queue.clear();
-      observer.disconnect();
-      elements.search.removeEventListener('input', search);
+      events.abort();
     },
   };
 }

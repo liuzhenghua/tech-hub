@@ -429,6 +429,42 @@ footer {
   overflow-wrap: anywhere;
   flex: 1;
 }
+.document-match {
+  font-size: 12px;
+  color: var(--accent);
+  overflow-wrap: anywhere;
+}
+.document-index-notice {
+  grid-column: 1 / -1;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 13px;
+}
+.document-index-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.document-index-summary button {
+  padding: 4px 10px;
+  font-size: inherit;
+}
+.document-index-notice details {
+  margin-top: 6px;
+}
+.document-index-notice summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+.document-index-notice ul {
+  max-height: 180px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  margin-bottom: 0;
+}
 .document-card-footer,
 .tool-link {
   color: var(--accent);
@@ -1002,7 +1038,7 @@ body > header {
   right: 0;
   top: calc(100% + 6px);
   z-index: 10;
-  min-width: 190px;
+  min-width: 240px;
   padding: 6px;
   border: 1px solid var(--line);
   border-radius: 9px;
@@ -1020,6 +1056,33 @@ body > header {
 }
 .export-options button:hover {
   background: var(--surface-soft);
+}
+.bundle-failures {
+  width: min(560px, calc(100% - 32px));
+  max-height: 80dvh;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px;
+  color: var(--ink);
+  background: var(--surface);
+}
+.bundle-failures::backdrop {
+  background: #0006;
+}
+.bundle-failures h2 {
+  margin-top: 0;
+  font-size: 18px;
+}
+.bundle-failures li {
+  overflow-wrap: anywhere;
+  margin-bottom: 8px;
+}
+.bundle-failure-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 @media print {
   @page {

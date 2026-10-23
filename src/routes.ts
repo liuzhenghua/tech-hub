@@ -1,7 +1,7 @@
 import { isDocumentPath } from './document-paths';
 export function documentHash(path: string, anchor = '') {
   return (
-    '#docs?' +
+    '#/docs?' +
     new URLSearchParams({ path, ...(anchor ? { section: anchor } : {}) })
   );
 }
@@ -10,7 +10,7 @@ export function parseRoute(hash: string, directory = 'docs') {
   const params = new URLSearchParams(query);
   const path = params.get('path') || '';
   return {
-    docs: page === 'docs',
+    docs: page === '/docs',
     path: isDocumentPath(path, directory) ? path : '',
     anchor: params.get('section') || '',
   };

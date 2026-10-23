@@ -18,15 +18,17 @@ export function createReader(
   session: DocumentSession,
   status: (text: string, duration?: number) => void,
   open: (path: string, anchor?: string) => void,
+  onClear: () => void = () => {},
 ) {
   let generation = 0;
   let loaded: { path: string; markdown: string } | null = null;
   const actionButtons = document.querySelectorAll<HTMLButtonElement>(
-    '#copy-markdown,#export-markdown,#export-pdf',
+    '#copy-markdown,#export-markdown,#export-bundle,#export-pdf',
   );
   const urls: string[] = [];
   function clear() {
     loaded = null;
+    onClear();
     actionButtons.forEach((button) => {
       button.disabled = true;
     });
