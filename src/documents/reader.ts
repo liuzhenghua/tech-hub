@@ -41,6 +41,8 @@ export function createReader(
   }
   async function show(path: string, anchor = '') {
     clear();
+    // Reset before loading so the previous document's scroll position is not reused.
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     const id = generation,
       source = session.source;
     status(session.cache?.get(path) ? '' : '正在加载文档…');
