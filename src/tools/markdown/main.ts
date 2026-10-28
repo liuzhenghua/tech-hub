@@ -1,6 +1,6 @@
 import { mountEditor } from '../shared/editor';
 import { tool } from './tool';
-import { mountPreviewExpansion } from './preview-expansion';
+import { mountPreviewExpansion } from '../shared/panel-expansion';
 const dispose = mountEditor(document.querySelector('main')!, tool);
 const disposeExpansion = mountPreviewExpansion(document.querySelector('main')!);
 if (import.meta.hot)

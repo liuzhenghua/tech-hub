@@ -121,6 +121,26 @@
   color: var(--muted);
   border-color: var(--line);
 }
+.tool-page .editor-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  padding: 6px;
+  flex-shrink: 0;
+}
+.tool-page .editor-icon[aria-pressed='true']:not(.fullscreen-icon) {
+  color: var(--accent);
+  background: var(--accent-soft, var(--surface));
+  border-color: var(--accent);
+}
+.tool-page .fullscreen-icon .fullscreen-exit,
+.tool-page .fullscreen-icon[aria-pressed='true'] .fullscreen-enter {
+  display: none;
+}
+.tool-page .fullscreen-icon[aria-pressed='true'] .fullscreen-exit {
+  display: block;
+}
 .tool-page textarea {
   flex: 1;
   display: block;
@@ -253,11 +273,16 @@
 }
 .tool-page .json-tree {
   flex: 1;
+  overflow-wrap: anywhere;
   overflow: auto;
   padding: 16px;
   font:
     13px/1.8 ui-monospace,
     monospace;
+}
+.tool-page .json-tree.no-wrap {
+  white-space: pre;
+  overflow-wrap: normal;
 }
 .tool-page .json-tree summary {
   cursor: pointer;

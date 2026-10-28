@@ -1,3 +1,4 @@
+import { setButtonLabel } from './button-label';
 import type { ToolDefinition, CryptoParameters } from './types';
 import { readState, writeState } from './storage';
 import { renderJSONTree } from './tree';
@@ -30,7 +31,8 @@ export function mountEditor(
     source = saved.source === true,
     wrap = saved.wrap !== false,
     timer: ReturnType<typeof setTimeout> | undefined,
-    disposed = false;
+    disposed = false,
+    pasting = false;
   let renderQueue = Promise.resolve();
   const parameterIds = [
     'jwt-key',
@@ -50,8 +52,11 @@ export function mountEditor(
     element('status').textContent = text;
     element('status').classList.toggle('error', error);
   };
-  const on = (node: EventTarget, event: string, handler: EventListener) =>
-    node.addEventListener(event, handler, { signal: events.signal });
+  const on = (
+    node: EventTarget | null,
+    event: string,
+    handler: EventListener,
+  ) => node?.addEventListener(event, handler, { signal: events.signal });
   function persist() {
     const success = writeState(tool.id, {
       input: input.value,
@@ -85,8 +90,10 @@ export function mountEditor(
   function view() {
     const hasTree = tool.id === 'json' && output.value !== '';
     element('json-controls').hidden = !hasTree;
-    element('expand-all').hidden = !treeMode;
-    element('collapse-all').hidden = !treeMode;
+    for (const id of ['expand-all', 'collapse-all', 'tree-expand-toggle']) {
+      const button = root.querySelector<HTMLElement>('#' + id);
+      if (button) button.hidden = !treeMode;
+    }
     tree.hidden = !(hasTree && treeMode);
     output.hidden = (hasTree && treeMode) || (!!tool.markdown && !source);
     preview.hidden = !tool.markdown || source;
@@ -94,11 +101,10 @@ export function mountEditor(
     element('markdown-toggle').textContent = source ? '预览' : 'HTML 源码';
     element('tree-toggle').textContent = treeMode ? '文本视图' : '树形视图';
     element('tree-toggle').setAttribute('aria-pressed', String(treeMode));
-    element('copy').textContent = tool.markdown
-      ? source
-        ? '复制 HTML'
-        : '复制富文本'
-      : '复制结果';
+    setButtonLabel(
+      element('copy'),
+      tool.markdown ? (source ? '复制 HTML' : '复制富文本') : '复制结果',
+    );
     const reuse = root.querySelector<HTMLButtonElement>('#reuse-output');
     if (reuse) reuse.disabled = !output.value;
     element<HTMLButtonElement>('copy').disabled = !output.value;
@@ -284,7 +290,19 @@ export function mountEditor(
   output.value = saved.output || '';
   variants(true);
   const disposeOptionTabs = mountOptionTabs(option);
-  on(input, 'input', () => inputChanged());
+  on(input, 'paste', () => {
+    pasting = true;
+  });
+  on(input, 'input', (event) => {
+    inputChanged();
+    if (
+      tool.id === 'json' &&
+      (pasting || (event as InputEvent).inputType === 'insertFromPaste')
+    ) {
+      timer = setTimeout(() => void run('format'), 0);
+    }
+    pasting = false;
+  });
   on(option, 'change', () => {
     revision++;
     clear();
@@ -309,7 +327,7 @@ export function mountEditor(
     view();
     persist();
   });
-  on(element('expand-all'), 'click', () => {
+  on(root.querySelector('#expand-all'), 'click', () => {
     const expand = () => {
       let changed = false;
       tree.querySelectorAll('details').forEach((node) => {
@@ -325,7 +343,7 @@ export function mountEditor(
     };
     expand();
   });
-  on(element('collapse-all'), 'click', () =>
+  on(root.querySelector('#collapse-all'), 'click', () =>
     tree.querySelectorAll('details').forEach((node) => {
       node.open = false;
     }),
@@ -341,7 +359,7 @@ export function mountEditor(
   });
   function updateWrap() {
     input.wrap = wrap ? 'soft' : 'off';
-    element('input-wrap').textContent = '自动换行：' + (wrap ? '开' : '关');
+    setButtonLabel(element('input-wrap'), '自动换行：' + (wrap ? '开' : '关'));
     element('input-wrap').setAttribute('aria-pressed', String(wrap));
   }
   on(element('input-wrap'), 'click', () => {

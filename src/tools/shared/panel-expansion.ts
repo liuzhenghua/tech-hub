@@ -1,6 +1,12 @@
+import { setButtonLabel } from './button-label';
+
 /** Expand the existing preview so diagrams and scroll state remain intact. */
-export function mountPreviewExpansion(root: HTMLElement): () => void {
-  const button = root.querySelector<HTMLButtonElement>('#preview-expand')!;
+export function mountPreviewExpansion(
+  root: HTMLElement,
+  selector = '#preview-expand',
+  label = '全屏预览',
+): () => void {
+  const button = root.querySelector<HTMLButtonElement>(selector)!;
   const panel = button.closest<HTMLElement>('.editor')!;
   const events = new AbortController();
   const background: HTMLElement[] = [];
@@ -19,7 +25,8 @@ export function mountPreviewExpansion(root: HTMLElement): () => void {
     background.forEach((node) => {
       node.inert = value;
     });
-    button.textContent = value ? '退出全屏' : '全屏预览';
+    const text = value ? '退出全屏' : label;
+    setButtonLabel(button, text);
     button.setAttribute('aria-pressed', String(value));
     if (!value) button.focus();
   }

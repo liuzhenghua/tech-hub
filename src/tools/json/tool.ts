@@ -2,7 +2,6 @@ import type { ToolDefinition } from '../shared/types';
 import { formatJSON } from './transform';
 export const tool: ToolDefinition = {
   id: 'json',
-  reuseOutput: true,
   title: 'JSON 工具',
   options: ['2', '4', 'tab'],
   optionLabel: '缩进',
