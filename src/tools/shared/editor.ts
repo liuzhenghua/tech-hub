@@ -282,7 +282,8 @@ export function mountEditor(
     persist();
   }
   const heading = root.querySelector('h1')!;
-  if (!heading.querySelector('[data-mode]')) heading.textContent = tool.title;
+  if (heading && !heading.querySelector('[data-mode]'))
+    heading.textContent = tool.title;
   document.title =
     tool.title + ' · ' + (import.meta.env.VITE_SITE_TITLE || '文档与工具');
   option.replaceChildren(

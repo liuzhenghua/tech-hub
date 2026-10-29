@@ -1,0 +1,67 @@
+<div class="clipboard-layout">
+  <div class="bottom-toolbar clipboard-toolbar">
+    <div class="toolbar">
+      <div
+        id="clipboard-categories"
+        class="option-tabs clipboard-categories"
+        role="group"
+        aria-label="剪贴板类目"
+      ></div>
+    </div>
+    <form id="clipboard-category-form" class="clipboard-category-form">
+      <input
+        id="clipboard-category-name"
+        aria-label="新类目名称"
+        placeholder="新类目名称"
+        maxlength="40"
+        required
+      />
+      <button type="submit">新增</button>
+    </form>
+  </div>
+  <section class="clipboard-content" aria-label="剪贴板条目">
+    <div class="clipboard-content-head">
+      <h2 id="clipboard-title">默认</h2>
+      <span id="clipboard-count"></span>
+    </div>
+    <form id="clipboard-entry-form" class="clipboard-entry-form">
+      <textarea
+        id="clipboard-entry-text"
+        aria-label="新条目内容"
+        placeholder="输入或粘贴文本，添加到当前类目…"
+        rows="1"
+        required
+      ></textarea>
+      <button type="submit">添加条目</button>
+    </form>
+    <p id="clipboard-empty">暂无条目，在上方添加常用文本。</p>
+    <div id="clipboard-entries" class="clipboard-entries"></div>
+  </section>
+</div>
+<div id="clipboard-status" role="status" aria-live="polite"></div>
+<footer><span>内容自动保存在当前浏览器 · 不上传</span></footer>
+
+<dialog
+  id="clipboard-detail"
+  class="clipboard-detail"
+  aria-labelledby="clipboard-detail-title"
+>
+  <div class="clipboard-detail-head">
+    <div>
+      <h2 id="clipboard-detail-title">条目详情</h2>
+      <p>查看和编辑完整内容，修改自动保存。</p>
+    </div>
+    <button
+      id="clipboard-detail-close"
+      class="clipboard-icon-button"
+      type="button"
+      aria-label="关闭详情"
+      title="关闭详情"
+    ></button>
+  </div>
+  <textarea
+    id="clipboard-detail-text"
+    aria-label="条目完整内容"
+    spellcheck="false"
+  ></textarea>
+</dialog>

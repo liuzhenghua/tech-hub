@@ -14,6 +14,14 @@
   padding: 16px 24px;
   gap: 12px;
 }
+.tool-workspace,
+.tool-workspace-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 12px;
+}
 .tool-header {
   position: static;
   max-width: none;
