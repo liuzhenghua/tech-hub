@@ -703,3 +703,22 @@
   background: white;
   box-shadow: 0 2px 12px #0002;
 }
+
+.tool-header .tool-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.tool-switch button {
+  background: transparent;
+  color: var(--muted);
+  border-color: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  padding: 4px 8px;
+}
+.tool-switch button[aria-pressed='true'] {
+  background: var(--accent);
+  color: white;
+}

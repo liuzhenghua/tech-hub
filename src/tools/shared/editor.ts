@@ -23,8 +23,16 @@ export function mountEditor(
     variant = element<HTMLSelectElement>('crypto-variant');
   const preview = element<HTMLDivElement>('markdown-preview'),
     tree = element<HTMLDivElement>('json-tree');
-  const saved = readState(tool.id),
-    events = new AbortController();
+  let saved = readState(tool.id);
+  if (tool.id === 'strings') {
+    const selected = tool.options.includes(saved.option || '')
+      ? saved.option!
+      : tool.options[0];
+    const optionState = readState(`${tool.id}-${selected}`);
+    if (optionState.input !== undefined)
+      saved = { ...optionState, option: selected };
+  }
+  const events = new AbortController();
   let revision = 0,
     busy = false,
     treeMode = saved.tree !== false,
@@ -58,7 +66,7 @@ export function mountEditor(
     handler: EventListener,
   ) => node?.addEventListener(event, handler, { signal: events.signal });
   function persist() {
-    const success = writeState(tool.id, {
+    const state = {
       input: input.value,
       output: output.value,
       option: option.value,
@@ -69,10 +77,14 @@ export function mountEditor(
       tree: treeMode,
       source,
       wrap,
-    });
-    element('storage-note').textContent = success
-      ? '内容自动保存在本机'
-      : '本地保存失败，请复制重要内容';
+    };
+    const success = writeState(tool.id, state);
+    const optionSaved =
+      tool.id !== 'strings' || writeState(`${tool.id}-${option.value}`, state);
+    element('storage-note').textContent =
+      success && optionSaved
+        ? '内容自动保存在本机'
+        : '本地保存失败，请复制重要内容';
   }
   function parameters(): CryptoParameters {
     return {
@@ -168,7 +180,7 @@ export function mountEditor(
       persist();
       message('完成');
     } catch (error) {
-      if (token === revision) {
+      if (!disposed && token === revision) {
         if (tool.id === 'jwt' && action === 'verify') {
           element('jwt-info').textContent =
             '签名未完成校验，请检查密钥与算法。';
@@ -178,7 +190,7 @@ export function mountEditor(
       }
     } finally {
       busy = false;
-      setBusy();
+      if (!disposed) setBusy();
     }
   }
   function setBusy() {
@@ -269,7 +281,8 @@ export function mountEditor(
     }
     persist();
   }
-  root.querySelector('h1')!.textContent = tool.title;
+  const heading = root.querySelector('h1')!;
+  if (!heading.querySelector('[data-mode]')) heading.textContent = tool.title;
   document.title =
     tool.title + ' · ' + (import.meta.env.VITE_SITE_TITLE || '文档与工具');
   option.replaceChildren(
@@ -288,6 +301,8 @@ export function mountEditor(
   }
   input.value = saved.input || '';
   output.value = saved.output || '';
+  tree.replaceChildren();
+  message('');
   variants(true);
   const disposeOptionTabs = mountOptionTabs(option);
   on(input, 'paste', () => {
@@ -303,11 +318,25 @@ export function mountEditor(
     }
     pasting = false;
   });
+  // Save the legacy string state into its selected operation before switching.
+  if (tool.id === 'strings') persist();
   on(option, 'change', () => {
     revision++;
+    clearTimeout(timer);
     clear();
+    if (tool.id === 'strings') restoreStringOption();
     variants();
+    view();
   });
+  function restoreStringOption() {
+    const state = readState(`${tool.id}-${option.value}`);
+    input.value = state.input || '';
+    output.value = state.output || '';
+    wrap = state.wrap !== false;
+    updateWrap();
+    element('count').textContent =
+      `· ${new TextEncoder().encode(input.value).length} 字节`;
+  }
   on(variant, 'change', () => {
     revision++;
     clear();
@@ -440,6 +469,7 @@ export function mountEditor(
     revision++;
     events.abort();
     disposeOptionTabs();
+    root.querySelector('#reuse-output')?.remove();
     clearTimeout(timer);
   };
 }

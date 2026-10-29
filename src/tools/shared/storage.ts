@@ -10,9 +10,9 @@ export interface EditorState {
 }
 export function readState(id: string): Partial<EditorState> {
   try {
-    const saved: unknown = JSON.parse(
-      localStorage.getItem('tool-page-' + id + '-content') || '{}',
-    );
+    const raw = localStorage.getItem('tool-page-' + id + '-content');
+    if (raw === null) return {};
+    const saved: unknown = JSON.parse(raw);
     if (!saved || typeof saved !== 'object') return {};
     const record = saved as Record<string, unknown>;
     // Read the previous per-tab format once; the next save uses EditorState.

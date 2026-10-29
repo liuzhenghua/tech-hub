@@ -1,6 +1,6 @@
 # 文档与工具
 
-通用文档与工具平台，提供 JSON、Markdown 预览（支持 Mermaid）、JWT、摘要、字符串处理和加解密六类浏览器工具，以及私有 GitHub 仓库的文档阅读入口。使用TypeScript + Vite，无需后端。
+通用文档与工具平台，提供 JSON、Markdown 预览（支持 Mermaid）、JWT、摘要、字符串处理和加解密六类浏览器工具，以及私有 GitHub 仓库的文档阅读入口。JSON 与字符串处理在同一页面顶部切换，输入、结果和选项各自独立保存；字符串处理的 Base64、转义和引号转换也分别保存输入与结果。使用TypeScript + Vite，无需后端。
 
 默认 GitHub Pages 访问地址：[https://liuzhenghua.github.io/tech-hub/](https://liuzhenghua.github.io/tech-hub/)。这是部署地址，实际可用性取决于发布状态。自行部署时，默认地址为 `https://<GitHub 用户名>.github.io/<网站仓库名>/`，与文档源仓库配置无关。
 
