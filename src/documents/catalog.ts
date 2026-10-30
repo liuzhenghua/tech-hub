@@ -24,6 +24,14 @@ export function createCatalog(
   function cardFor(group: DocumentGroup, query: string) {
     const path = group.entry.path;
     const preview = session.preview(path);
+    const searching = !!query.trim();
+    const visibleChildren = searching
+      ? matchingGroupDocuments(
+          group,
+          (path) => session.preview(path),
+          query,
+        ).filter((entry) => entry.path !== path)
+      : group.children;
     const card = document.createElement('div');
     card.className = 'document-card';
     card.dataset.path = path;
@@ -54,16 +62,19 @@ export function createCatalog(
       open(path);
     };
     footer.append(mainLink);
-    if (group.children.length) {
+    if (visibleChildren.length) {
       const children = document.createElement('span');
       children.className = 'document-children';
       const count = document.createElement('span');
-      count.textContent = `${group.children.length} 篇子文档`;
+      count.textContent = `${searching ? '命中 ' : ''}${visibleChildren.length} 篇子文档`;
       const list = document.createElement('span');
       list.className = 'document-children-list';
       list.id = 'children-' + crypto.randomUUID();
-      list.setAttribute('aria-label', '子文档列表');
-      for (const entry of group.children) {
+      list.setAttribute(
+        'aria-label',
+        searching ? '命中的子文档列表' : '子文档列表',
+      );
+      for (const entry of visibleChildren) {
         const item = document.createElement('a');
         item.href = documentHash(entry.path);
         item.onclick = (event) => {
@@ -85,24 +96,6 @@ export function createCatalog(
       footer.append(' · ', children);
     }
     card.append(tag, title, excerpt);
-    const matches = matchingGroupDocuments(
-      group,
-      (path) => session.preview(path),
-      query,
-    ).filter((entry) => entry.path !== path);
-    if (matches.length) {
-      const hint = document.createElement('p');
-      hint.className = 'document-match';
-      hint.textContent =
-        '命中子文档：' +
-        matches
-          .map(
-            (entry) =>
-              session.preview(entry.path)?.title || entry.path.split('/').pop(),
-          )
-          .join('、');
-      card.append(hint);
-    }
     card.append(footer);
     card.onclick = (event) => {
       if (

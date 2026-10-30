@@ -430,11 +430,6 @@ footer {
   overflow-wrap: anywhere;
   flex: 1;
 }
-.document-match {
-  font-size: 12px;
-  color: var(--accent);
-  overflow-wrap: anywhere;
-}
 .document-index-notice {
   grid-column: 1 / -1;
   padding: 12px 16px;
