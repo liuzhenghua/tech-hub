@@ -1,3 +1,4 @@
+import { createCopyFeedback } from '../../copy-feedback';
 import { setButtonLabel } from './button-label';
 import type { ToolDefinition, CryptoParameters } from './types';
 import { readState, writeState } from './storage';
@@ -24,15 +25,16 @@ export function mountEditor(
   const preview = element<HTMLDivElement>('markdown-preview'),
     tree = element<HTMLDivElement>('json-tree');
   let saved = readState(tool.id);
-  if (tool.id === 'strings') {
+  if (tool.separateOptionState) {
     const selected = tool.options.includes(saved.option || '')
       ? saved.option!
       : tool.options[0];
     const optionState = readState(`${tool.id}-${selected}`);
-    if (optionState.input !== undefined)
+    if (optionState.input !== undefined || saved.option !== selected)
       saved = { ...optionState, option: selected };
   }
   const events = new AbortController();
+  const copyFeedback = createCopyFeedback();
   let revision = 0,
     busy = false,
     treeMode = saved.tree !== false,
@@ -80,7 +82,8 @@ export function mountEditor(
     };
     const success = writeState(tool.id, state);
     const optionSaved =
-      tool.id !== 'strings' || writeState(`${tool.id}-${option.value}`, state);
+      !tool.separateOptionState ||
+      writeState(`${tool.id}-${option.value}`, state);
     element('storage-note').textContent =
       success && optionSaved
         ? '内容自动保存在本机'
@@ -100,6 +103,7 @@ export function mountEditor(
     };
   }
   function view() {
+    copyFeedback.reset(element('copy'));
     const hasTree = tool.id === 'json' && output.value !== '';
     element('json-controls').hidden = !hasTree;
     for (const id of ['expand-all', 'collapse-all', 'tree-expand-toggle']) {
@@ -319,17 +323,17 @@ export function mountEditor(
     }
     pasting = false;
   });
-  // Save the legacy string state into its selected operation before switching.
-  if (tool.id === 'strings') persist();
+  // Save legacy single-draft state under its selected operation before switching.
+  if (tool.separateOptionState) persist();
   on(option, 'change', () => {
     revision++;
     clearTimeout(timer);
     clear();
-    if (tool.id === 'strings') restoreStringOption();
+    if (tool.separateOptionState) restoreOptionState();
     variants();
     view();
   });
-  function restoreStringOption() {
+  function restoreOptionState() {
     const state = readState(`${tool.id}-${option.value}`);
     input.value = state.input || '';
     output.value = state.output || '';
@@ -398,6 +402,7 @@ export function mountEditor(
     persist();
   });
   on(element('copy'), 'click', () => {
+    const token = revision;
     void (async () => {
       try {
         if (tool.markdown && !source && typeof ClipboardItem !== 'undefined') {
@@ -414,9 +419,10 @@ export function mountEditor(
             }),
           ]);
         } else await navigator.clipboard.writeText(output.value);
-        message('已复制');
+        if (!disposed && token === revision) copyFeedback.show(element('copy'));
       } catch {
-        message('复制失败，请手动选中内容复制。', true);
+        if (!disposed && token === revision)
+          message('复制失败，请手动选中内容复制。', true);
       }
     })();
   });
@@ -467,6 +473,7 @@ export function mountEditor(
   else if (tool.autoAction && input.value.trim()) void run(tool.autoAction);
   return () => {
     disposed = true;
+    copyFeedback.dispose();
     revision++;
     events.abort();
     disposeOptionTabs();

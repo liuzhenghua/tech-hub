@@ -32,10 +32,6 @@ test('JSON strict format, repair and large-number strings', () => {
 test('strings preserve Unicode and only supported escape sequences', () => {
   const text = '中文 😀\n"\\';
   assert.equal(
-    transformString(transformString(text, 'base64-encode'), 'base64-decode'),
-    text,
-  );
-  assert.equal(
     transformString(transformString(text, 'escape'), 'unescape'),
     text,
   );

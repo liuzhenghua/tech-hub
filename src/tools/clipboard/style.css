@@ -158,6 +158,8 @@
   color: #a23b30;
 }
 .clipboard-entry .clipboard-copy {
+  font-size: 12px;
+  min-width: 78px;
   background: var(--surface-soft);
   color: var(--accent);
   margin-left: 4px;

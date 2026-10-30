@@ -1,0 +1,196 @@
+<div class="bottom-toolbar">
+  <div class="toolbar">
+    <label for="generator-kind">生成类型</label>
+    <select id="generator-kind">
+      <option value="uuid">UUID</option>
+      <option value="key">随机密钥</option>
+      <option value="password">安全密码</option>
+      <option value="rsa">RSA 密钥对</option>
+    </select>
+  </div>
+  <span class="generator-local-note">浏览器内生成</span>
+</div>
+<div class="generator-panels">
+  <form class="generator-panel" data-generator="uuid">
+    <div class="generator-heading">
+      <h2>UUID</h2>
+      <p>生成 UUID v4，适合请求标识、记录 ID 和测试数据。</p>
+    </div>
+    <div class="generator-settings">
+      <label
+        >数量<input
+          name="count"
+          type="number"
+          min="1"
+          max="100"
+          value="1"
+          required
+      /></label>
+      <label class="generator-check"
+        ><input name="hyphens" type="checkbox" checked />保留连字符</label
+      >
+      <label class="generator-check"
+        ><input name="uppercase" type="checkbox" />大写</label
+      >
+      <button type="submit">生成 UUID</button>
+    </div>
+    <div class="generator-results">
+      <section class="generator-result">
+        <div class="generator-result-head">
+          <span>生成结果</span
+          ><button type="button" data-copy="uuid" disabled>复制</button>
+        </div>
+        <textarea
+          id="generator-output-uuid"
+          readonly
+          aria-label="UUID 生成结果"
+          placeholder="点击生成后显示结果，每行一个 UUID"
+          spellcheck="false"
+        ></textarea>
+      </section>
+    </div>
+    <p class="generator-status" role="status" aria-live="polite"></p>
+  </form>
+  <form class="generator-panel" data-generator="key" hidden>
+    <div class="generator-heading">
+      <h2>随机密钥</h2>
+      <p>
+        默认 32 字节（256 位）。Hex 编码后为 64
+        个字符；编码长度与原始字节数不同。
+      </p>
+    </div>
+    <div class="generator-settings">
+      <label
+        >长度（字节）<input
+          name="bytes"
+          type="number"
+          min="1"
+          max="4096"
+          value="32"
+          required
+      /></label>
+      <label
+        >编码<select name="encoding">
+          <option>Hex</option>
+          <option>Base64</option>
+        </select></label
+      >
+      <button type="submit">生成密钥</button>
+    </div>
+    <div class="generator-results">
+      <section class="generator-result">
+        <div class="generator-result-head">
+          <span>随机密钥</span
+          ><button type="button" data-copy="key" disabled>复制</button>
+        </div>
+        <textarea
+          id="generator-output-key"
+          readonly
+          aria-label="随机密钥生成结果"
+          placeholder="点击生成后显示密钥"
+          spellcheck="false"
+        ></textarea>
+      </section>
+    </div>
+    <p class="generator-status" role="status" aria-live="polite"></p>
+  </form>
+  <form class="generator-panel" data-generator="password" hidden>
+    <div class="generator-heading">
+      <h2>安全密码</h2>
+      <p>可选择字符类型，生成结果包含每种已选类型。</p>
+    </div>
+    <div class="generator-settings">
+      <label
+        >长度（字符）<input
+          name="length"
+          type="number"
+          min="8"
+          max="256"
+          value="20"
+          required
+      /></label>
+      <label class="generator-check"
+        ><input name="lower" type="checkbox" checked />小写</label
+      >
+      <label class="generator-check"
+        ><input name="upper" type="checkbox" checked />大写</label
+      >
+      <label class="generator-check"
+        ><input name="digits" type="checkbox" checked />数字</label
+      >
+      <label class="generator-check"
+        ><input name="symbols" type="checkbox" checked />符号</label
+      >
+      <button type="submit">生成密码</button>
+    </div>
+    <div class="generator-results">
+      <section class="generator-result">
+        <div class="generator-result-head">
+          <span>生成密码</span
+          ><button type="button" data-copy="password" disabled>复制</button>
+        </div>
+        <textarea
+          id="generator-output-password"
+          readonly
+          aria-label="安全密码生成结果"
+          placeholder="点击生成后显示密码"
+          spellcheck="false"
+        ></textarea>
+      </section>
+    </div>
+    <p class="generator-status" role="status" aria-live="polite"></p>
+  </form>
+  <form class="generator-panel" data-generator="rsa" hidden>
+    <div class="generator-heading">
+      <h2>RSA 密钥对</h2>
+      <p data-rsa-hint></p>
+    </div>
+    <div class="generator-settings">
+      <label
+        >密钥长度<select name="bits">
+          <option value="2048">2048 位</option>
+          <option value="3072">3072 位</option>
+          <option value="4096">4096 位</option>
+        </select></label
+      >
+      <label
+        >输出格式<select name="rsa-format" class="generator-rsa-format"></select
+      ></label>
+      <button type="submit">生成密钥对</button>
+    </div>
+    <div class="generator-results generator-keypair">
+      <section class="generator-result">
+        <div class="generator-result-head">
+          <span data-rsa-public-label>公钥 · SPKI</span
+          ><button type="button" data-copy="public" disabled>复制公钥</button>
+        </div>
+        <textarea
+          id="generator-output-public"
+          readonly
+          aria-label="RSA 公钥"
+          placeholder="点击生成后显示公钥"
+          spellcheck="false"
+        ></textarea>
+      </section>
+      <section class="generator-result">
+        <div class="generator-result-head">
+          <span data-rsa-private-label>私钥 · PKCS#8</span
+          ><button type="button" data-copy="private" disabled>复制私钥</button>
+        </div>
+        <textarea
+          id="generator-output-private"
+          readonly
+          aria-label="RSA 私钥"
+          placeholder="点击生成后显示私钥"
+          spellcheck="false"
+        ></textarea>
+      </section>
+    </div>
+    <p class="generator-status" role="status" aria-live="polite"></p>
+  </form>
+</div>
+<footer>
+  <span
+    >使用 Web Crypto 随机源 · 结果仅在当前页面保留，刷新后清除 · 不上传</span
+  >
+</footer>

@@ -1,4 +1,3 @@
-import { encoder, decoder, fromBase64, encodeBytes } from '../shared/bytes';
 export function escapeString(value: string) {
   return value
     .replace(/\\/g, '\\\\')
@@ -54,10 +53,6 @@ export function transformString(value: string, action: string): string {
       return unescapeString(value);
     case 'quotes':
       return singleToDoubleQuotes(value);
-    case 'base64-encode':
-      return encodeBytes(encoder.encode(value), 'Base64');
-    case 'base64-decode':
-      return decoder.decode(fromBase64(value));
     default:
       throw Error('未知字符串操作');
   }

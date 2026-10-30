@@ -1,8 +1,8 @@
-import { setButtonLabel } from '../shared/button-label';
-import { mountPreviewExpansion } from '../shared/panel-expansion';
+import { setButtonLabel } from './button-label';
+import { mountPreviewExpansion } from './panel-expansion';
 
-/** JSON-only result controls; editing and persistence stay in the shared editor. */
-export function mountJSONControls(root: HTMLElement): () => void {
+/** Result wrapping, fullscreen, and optional JSON tree controls. */
+export function mountResultControls(root: HTMLElement): () => void {
   const events = new AbortController();
   const tree = root.querySelector<HTMLElement>('#json-tree')!;
   const output = root.querySelector<HTMLTextAreaElement>('#output')!;

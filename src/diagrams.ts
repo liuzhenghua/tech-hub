@@ -1,3 +1,4 @@
+import { createCopyFeedback } from './copy-feedback';
 // Freeze computed presentation before moving SVG outside Mermaid's scoped container.
 function presentationClone(svg: SVGSVGElement) {
   const clone = svg.cloneNode(true) as SVGSVGElement;
@@ -192,6 +193,7 @@ export function enhanceDiagrams(
   root: HTMLElement,
   status: (message: string, duration?: number) => void,
 ) {
+  const copyFeedback = createCopyFeedback();
   for (const diagram of root.querySelectorAll<HTMLElement>('.mermaid')) {
     const svg = diagram.querySelector('svg');
     if (!svg || diagram.parentElement!.classList.contains('diagram-frame'))
@@ -215,6 +217,8 @@ export function enhanceDiagrams(
       button.onclick = async () => {
         try {
           await handler();
+          if (name.startsWith('复制') && root.contains(button))
+            copyFeedback.show(button);
         } catch {
           status(
             '操作失败：浏览器可能不支持图片剪贴板，请下载 SVG 或复制源码。',
@@ -229,7 +233,6 @@ export function enhanceDiagrams(
         await navigator.clipboard.write([
           new ClipboardItem({ 'image/png': pngBlob(svg) }),
         ]);
-        status('图表图片已复制。', 3000);
       }),
     );
     const more = document.createElement('details');
@@ -243,8 +246,6 @@ export function enhanceDiagrams(
       summary,
       action('复制源码', async () => {
         await navigator.clipboard.writeText(diagram.dataset.source || '');
-        more.open = false;
-        status('Mermaid 源码已复制。', 3000);
       }),
       action('下载 SVG', () => {
         download(svg);

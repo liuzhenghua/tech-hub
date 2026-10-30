@@ -3,6 +3,9 @@ import { formatJSON } from './transform';
 export const tool: ToolDefinition = {
   id: 'json',
   title: 'JSON 工具',
+  inputLabel: 'JSON 原文',
+  inputPlaceholder: '粘贴 JSON 后自动格式化，也可手动压缩或修复…',
+  outputPlaceholder: '处理后的 JSON 会显示在这里',
   options: ['2', '4', 'tab'],
   optionLabel: '缩进',
   hint: '修复采用启发式规则，处理后请核对内容。大整数建议使用字符串。',

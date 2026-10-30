@@ -1,4 +1,5 @@
 import markup from './panel.html?raw';
+import { createCopyFeedback } from '../../copy-feedback';
 import {
   activeCategory,
   addCategory,
@@ -6,13 +7,14 @@ import {
   type ClipboardEntry,
 } from './model';
 import { loadClipboard, saveClipboard } from './storage';
-import { icon } from './icons';
+import { icon } from '../shared/icons';
 import { mountClipboardDetails } from './details';
 
 export function mountClipboard(root: HTMLElement): () => void {
   root.innerHTML = markup;
   const { state, error } = loadClipboard();
   const events = new AbortController();
+  const copyFeedback = createCopyFeedback();
   const details = mountClipboardDetails(root);
   root.querySelector('#clipboard-category-form button')!.prepend(icon('plus'));
   root.querySelector('#clipboard-entry-form button')!.prepend(icon('plus'));
@@ -39,10 +41,10 @@ export function mountClipboard(root: HTMLElement): () => void {
     element.addEventListener('click', action);
     return element;
   }
-  async function copy(entry: ClipboardEntry) {
+  async function copy(entry: ClipboardEntry, button: HTMLButtonElement) {
     try {
       await navigator.clipboard.writeText(entry.text);
-      if (!disposed) message('已复制');
+      if (!disposed && root.contains(button)) copyFeedback.show(button);
     } catch {
       if (!disposed) message('复制失败，请选中文本手动复制。', true);
     }
@@ -75,7 +77,7 @@ export function mountClipboard(root: HTMLElement): () => void {
     remove.title = '删除条目';
     remove.setAttribute('aria-label', '删除条目');
     remove.append(icon('trash'));
-    const copyButton = button('复制', () => void copy(entry));
+    const copyButton = button('复制', () => void copy(entry, copyButton));
     copyButton.setAttribute('aria-label', '复制条目');
     copyButton.className = 'clipboard-copy';
     copyButton.prepend(icon('copy'));
@@ -83,6 +85,7 @@ export function mountClipboard(root: HTMLElement): () => void {
     return row;
   }
   function render() {
+    copyFeedback.resetAll();
     const category = activeCategory(state);
     node<HTMLTextAreaElement>('entry-text').value =
       drafts.get(category.id) || '';
@@ -144,6 +147,7 @@ export function mountClipboard(root: HTMLElement): () => void {
   if (error) message(error, true);
   return () => {
     disposed = true;
+    copyFeedback.dispose();
     details.dispose();
     events.abort();
     root.replaceChildren();

@@ -1,5 +1,5 @@
 import type { ClipboardEntry } from './model';
-import { icon } from './icons';
+import { icon } from '../shared/icons';
 
 export function mountClipboardDetails(root: HTMLElement) {
   const dialog = root.querySelector<HTMLDialogElement>('#clipboard-detail')!;

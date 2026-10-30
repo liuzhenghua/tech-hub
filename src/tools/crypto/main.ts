@@ -1,4 +1,6 @@
-import { mountEditor } from '../shared/editor';
-import { tool } from './tool';
-const dispose = mountEditor(document.querySelector('main')!, tool);
+import { mountCryptoWorkspace } from './workspace';
+
+const dispose = mountCryptoWorkspace(
+  document.querySelector<HTMLElement>('main')!,
+);
 if (import.meta.hot) import.meta.hot.dispose(dispose);

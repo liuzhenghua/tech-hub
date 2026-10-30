@@ -28,6 +28,10 @@ export interface ToolDefinition {
   title: string;
   options: string[];
   optionLabel?: string;
+  separateOptionState?: boolean;
+  inputLabel?: string;
+  inputPlaceholder?: string;
+  outputPlaceholder?: string;
   variants?: (option: string) => string[];
   actions: (option: string) => Array<{ label: string; id: string }>;
   run: (context: ToolContext) => ToolResult | Promise<ToolResult>;

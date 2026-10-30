@@ -1,3 +1,4 @@
+import { createCopyFeedback } from './copy-feedback';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import hljs from 'highlight.js/lib/common';
@@ -28,6 +29,7 @@ export function enhanceCodeBlocks(
   root: HTMLElement,
   status: (message: string) => void = () => {},
 ) {
+  const copyFeedback = createCopyFeedback();
   for (const pre of root.querySelectorAll('pre')) {
     const code = pre.querySelector('code');
     if (!code || code.classList.contains('language-mermaid')) continue;
@@ -46,17 +48,11 @@ export function enhanceCodeBlocks(
     button.onclick = async () => {
       try {
         await navigator.clipboard.writeText(code.textContent);
-        button.innerHTML =
-          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
-        button.setAttribute('aria-label', '已复制');
+        if (root.contains(button)) copyFeedback.show(button);
       } catch {
         button.setAttribute('aria-label', '复制失败');
         status('浏览器未允许复制，请选中代码后手动复制。');
       }
-      setTimeout(() => {
-        button.innerHTML = copyIcon;
-        button.setAttribute('aria-label', '复制代码');
-      }, 2000);
     };
     pre.append(button);
   }
