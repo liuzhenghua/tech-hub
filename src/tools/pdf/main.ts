@@ -1,3 +1,5 @@
+import { recordUsage } from '../../tool-usage';
+recordUsage('pdf', true);
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 import { renderPagePng } from './render';
 import { mountPagePreview } from './preview';

@@ -1,3 +1,4 @@
+import { recordUsage } from '../../tool-usage';
 export interface WorkspaceTool {
   title: string;
   mount: (root: HTMLElement) => () => void;
@@ -13,6 +14,7 @@ export function mountToolWorkspace(
   const events = new AbortController();
   const panels = new Map<string, HTMLElement>();
   const disposers: (() => void)[] = [];
+  let activeMode: string | undefined;
   function createPanel(mode: string) {
     const panel = document.createElement('section');
     panel.className = 'tool-workspace-panel';
@@ -29,6 +31,8 @@ export function mountToolWorkspace(
       return;
     }
     const mode = Object.hasOwn(tools, hash) ? hash : defaultMode;
+    if (mode !== activeMode) recordUsage(mode, activeMode === undefined);
+    activeMode = mode;
     const panel = panels.get(mode) ?? createPanel(mode);
     host.replaceChildren(panel);
     for (const button of root.querySelectorAll<HTMLElement>('[data-mode]'))

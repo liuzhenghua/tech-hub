@@ -1,3 +1,5 @@
+import { recordUsage } from '../../tool-usage';
+recordUsage('jwt', true);
 import { mountEditor } from '../shared/editor';
 import { tool } from './tool';
 const dispose = mountEditor(document.querySelector('main')!, tool);

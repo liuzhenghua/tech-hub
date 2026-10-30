@@ -1,3 +1,4 @@
+import { documentHash } from '../routes';
 import type { DocumentSession } from './session';
 import type { DocumentGroup } from './groups';
 import { matchingGroupDocuments } from './groups';
@@ -23,7 +24,7 @@ export function createCatalog(
   function cardFor(group: DocumentGroup, query: string) {
     const path = group.entry.path;
     const preview = session.preview(path);
-    const card = document.createElement('button');
+    const card = document.createElement('div');
     card.className = 'document-card';
     card.dataset.path = path;
     const parts = path.split('/');
@@ -41,9 +42,48 @@ export function createCatalog(
     excerpt.textContent = preview?.text || '打开查看完整文档';
     const footer = document.createElement('span');
     footer.className = 'document-card-footer';
-    footer.textContent = group.children.length
-      ? `阅读文档 ↗ · ${group.children.length} 篇子文档`
-      : '阅读文档 ↗';
+    const mainLink = document.createElement('a');
+    mainLink.href = documentHash(path);
+    mainLink.textContent = '阅读文档 ↗';
+    mainLink.setAttribute('aria-label', `阅读 ${title.textContent}`);
+    mainLink.onclick = (event) => {
+      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)
+        return;
+      event.preventDefault();
+      event.stopPropagation();
+      open(path);
+    };
+    footer.append(mainLink);
+    if (group.children.length) {
+      const children = document.createElement('span');
+      children.className = 'document-children';
+      const count = document.createElement('span');
+      count.textContent = `${group.children.length} 篇子文档`;
+      const list = document.createElement('span');
+      list.className = 'document-children-list';
+      list.id = 'children-' + crypto.randomUUID();
+      list.setAttribute('aria-label', '子文档列表');
+      for (const entry of group.children) {
+        const item = document.createElement('a');
+        item.href = documentHash(entry.path);
+        item.onclick = (event) => {
+          event.stopPropagation();
+          if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)
+            return;
+          event.preventDefault();
+          open(entry.path);
+        };
+        item.textContent =
+          session.preview(entry.path)?.title ||
+          entry.path.split('/').pop()!.replace(/\.md$/i, '');
+        item.title = entry.path;
+        list.append(item);
+      }
+      count.tabIndex = 0;
+      count.setAttribute('aria-controls', list.id);
+      children.append(count, list);
+      footer.append(' · ', children);
+    }
     card.append(tag, title, excerpt);
     const matches = matchingGroupDocuments(
       group,
@@ -64,7 +104,13 @@ export function createCatalog(
       card.append(hint);
     }
     card.append(footer);
-    card.onclick = () => open(path);
+    card.onclick = (event) => {
+      if (
+        !(event.target instanceof Element) ||
+        !event.target.closest('.document-children, a')
+      )
+        open(path);
+    };
     return card;
   }
   function renderCategories(groups: DocumentGroup[]) {

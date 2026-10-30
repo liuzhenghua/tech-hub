@@ -1,3 +1,5 @@
+import { recordUsage } from '../../tool-usage';
+recordUsage('markdown', true);
 import { mountEditor } from '../shared/editor';
 import { tool } from './tool';
 import { mountPreviewExpansion } from '../shared/panel-expansion';

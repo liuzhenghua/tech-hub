@@ -398,6 +398,7 @@ footer {
   gap: 16px;
 }
 .document-card {
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -466,7 +467,7 @@ footer {
   margin-bottom: 0;
 }
 .document-card-footer,
-.tool-link {
+.tool-card-footer {
   color: var(--accent);
   font-size: 11px;
   border-top: 1px solid #edf0ea;
@@ -694,7 +695,7 @@ article {
   flex: initial;
 }
 .document-card-footer,
-.tool-link {
+.tool-card-footer {
   margin-top: auto;
 }
 
@@ -1162,17 +1163,73 @@ body > header {
   }
 }
 
-/* Temporary copy confirmation, including icon-only buttons. */
+/* Copy feedback preserves each button's original content size and layout. */
 button[data-copy-feedback] {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-.copy-code[data-copy-feedback],
-.tool-page button[data-copy-feedback] {
-  width: auto;
-  min-width: 32px;
   color: var(--accent);
   background: var(--surface-soft);
+}
+
+.tool-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.tool-usage {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.tool-usage svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+
+.document-children {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted var(--muted);
+}
+.document-children-list {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  z-index: 5;
+  display: none;
+  width: max-content;
+  max-width: min(320px, 65vw);
+  max-height: 240px;
+  overflow: auto;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 6px 24px #243b2826;
+  font-size: 12px;
+  font-weight: 400;
+  text-align: left;
+  cursor: default;
+}
+.document-children-list > a {
+  display: block;
+  padding: 4px 0;
+  overflow-wrap: anywhere;
+}
+.document-children:hover .document-children-list,
+.document-card:focus-within .document-children-list {
+  display: block;
+}
+
+.document-children-list > a:hover,
+.document-children-list > a:focus-visible {
+  color: var(--accent);
+  text-decoration: underline;
 }

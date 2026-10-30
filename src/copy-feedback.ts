@@ -36,11 +36,19 @@ export function createCopyFeedback() {
         ? previous.label
         : button.getAttribute('aria-label');
       const title = previous ? previous.title : button.getAttribute('title');
-      const svg = button.querySelector('svg');
-      button.replaceChildren(
-        ...(svg ? [svg.cloneNode(true)] : []),
-        document.createTextNode('已复制'),
-      );
+      const content = nodes.map((node) => node.cloneNode(true));
+      for (const node of content) {
+        if (!(node instanceof SVGSVGElement)) continue;
+        node.replaceChildren();
+        node.setAttribute('viewBox', '0 0 24 24');
+        node.setAttribute('fill', 'none');
+        node.setAttribute('stroke', 'currentColor');
+        node.setAttribute('stroke-width', '2');
+        node.setAttribute('stroke-linecap', 'round');
+        node.setAttribute('stroke-linejoin', 'round');
+        node.innerHTML = '<path d="m5 12 4 4L19 6"/>';
+      }
+      button.replaceChildren(...content);
       button.setAttribute('aria-label', '已复制');
       button.title = '已复制';
       button.setAttribute('data-copy-feedback', 'true');
