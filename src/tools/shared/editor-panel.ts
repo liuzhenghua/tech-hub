@@ -15,7 +15,7 @@ export function mountEditorPanel(
   root.querySelector<HTMLTextAreaElement>('#output')!.placeholder =
     tool.outputPlaceholder || '处理结果会显示在这里';
   const disposeEditor = mountEditor(root, tool);
-  const disposeControls = mountResultControls(root);
+  const disposeControls = mountResultControls(root, tool.id !== 'json');
   return () => {
     disposeControls();
     disposeEditor();

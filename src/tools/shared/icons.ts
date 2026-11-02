@@ -1,4 +1,5 @@
 const paths = {
+  check: '<path d="m5 12 4 4L19 6"/>',
   refresh:
     '<path d="M20 7v5h-5M4 17v-5h5"/><path d="M6 6a8 8 0 0 1 13 3M5 15a8 8 0 0 0 13 3"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',

@@ -315,11 +315,12 @@ export function mountEditor(
   });
   on(input, 'input', (event) => {
     inputChanged();
-    if (
-      tool.id === 'json' &&
-      (pasting || (event as InputEvent).inputType === 'insertFromPaste')
-    ) {
-      timer = setTimeout(() => void run('format'), 0);
+    if (pasting || (event as InputEvent).inputType === 'insertFromPaste') {
+      const action =
+        tool.id === 'json'
+          ? 'format'
+          : tool.pasteAction?.(input.value, option.value);
+      if (action) timer = setTimeout(() => void run(action), 0);
     }
     pasting = false;
   });

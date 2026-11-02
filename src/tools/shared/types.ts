@@ -38,5 +38,6 @@ export interface ToolDefinition {
   markdown?: boolean;
   reuseOutput?: boolean;
   autoAction?: string;
+  pasteAction?: (value: string, option: string) => string | undefined;
   hint: string | ((option: string, variant: string) => string);
 }

@@ -295,6 +295,33 @@
 .tool-page .json-tree summary {
   cursor: pointer;
 }
+.tool-page .json-node-copy {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  margin-left: 6px;
+  padding: 3px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+}
+.tool-page .json-node-copy:hover,
+.tool-page .json-node-copy:focus-visible {
+  background: var(--surface);
+  color: var(--ink);
+}
+.tool-page .json-node-copy svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 .tool-page .json-children {
   margin-left: 8px;
   padding-left: 14px;

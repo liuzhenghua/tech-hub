@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createHmac, generateKeyPairSync } from 'node:crypto';
 import { formatJSON } from '../src/tools/json/transform';
 import { transformString } from '../src/tools/strings/transform';
+import { tool as stringsTool } from '../src/tools/strings/tool';
 import { digest } from '../src/tools/digest/transform';
 import { parseJWT } from '../src/tools/jwt/transform';
 import { transformCipher } from '../src/tools/crypto/transform';
@@ -40,6 +41,19 @@ test('strings preserve Unicode and only supported escape sequences', () => {
     '{"hello":"world"}',
   );
   assert.throws(() => transformString('bad', 'unsupported'));
+});
+test('string paste chooses unescape only for literal newline escapes in the escape tab', () => {
+  for (const [input, action, expected] of [
+    ['first\\nsecond', 'unescape', 'first\nsecond'],
+    ['first\nsecond', 'escape', 'first\\nsecond'],
+    ['"text"\tvalue', 'escape', '\\"text\\"\\tvalue'],
+    ['plain text', 'escape', 'plain text'],
+    ['first\\tsecond', 'escape', 'first\\\\tsecond'],
+  ]) {
+    assert.equal(stringsTool.pasteAction!(input, '转义'), action);
+    assert.equal(transformString(input, action), expected);
+    assert.equal(stringsTool.pasteAction!(input, '引号转换'), undefined);
+  }
 });
 test('digest known vectors and keyed authentication', async () => {
   assert.equal(

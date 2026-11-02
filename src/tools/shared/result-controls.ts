@@ -2,12 +2,22 @@ import { setButtonLabel } from './button-label';
 import { mountPreviewExpansion } from './panel-expansion';
 
 /** Result wrapping, fullscreen, and optional JSON tree controls. */
-export function mountResultControls(root: HTMLElement): () => void {
+export function mountResultControls(
+  root: HTMLElement,
+  defaultWrap = true,
+): () => void {
   const events = new AbortController();
   const tree = root.querySelector<HTMLElement>('#json-tree')!;
   const output = root.querySelector<HTMLTextAreaElement>('#output')!;
   const toggle = root.querySelector<HTMLButtonElement>('#tree-expand-toggle')!;
   const wrap = root.querySelector<HTMLButtonElement>('#output-wrap')!;
+  function setWrap(enabled: boolean) {
+    wrap.setAttribute('aria-pressed', String(enabled));
+    setButtonLabel(wrap, '自动换行：' + (enabled ? '开' : '关'));
+    output.wrap = enabled ? 'soft' : 'off';
+    tree.classList.toggle('no-wrap', !enabled);
+  }
+  setWrap(defaultWrap);
   function updateExpansion() {
     const expanded =
       !!tree.querySelector('details') &&
@@ -43,11 +53,7 @@ export function mountResultControls(root: HTMLElement): () => void {
   wrap.addEventListener(
     'click',
     () => {
-      const enabled = wrap.getAttribute('aria-pressed') !== 'true';
-      wrap.setAttribute('aria-pressed', String(enabled));
-      setButtonLabel(wrap, '自动换行：' + (enabled ? '开' : '关'));
-      output.wrap = enabled ? 'soft' : 'off';
-      tree.classList.toggle('no-wrap', !enabled);
+      setWrap(wrap.getAttribute('aria-pressed') !== 'true');
     },
     { signal: events.signal },
   );
