@@ -1,5 +1,5 @@
 import type { ToolDefinition } from '../shared/types';
-import { transformString } from './transform';
+import { hasStringEscapes, transformString } from './transform';
 export const tool: ToolDefinition = {
   id: 'strings',
   reuseOutput: true,
@@ -10,13 +10,13 @@ export const tool: ToolDefinition = {
   optionLabel: '转换类型',
   pasteAction: (value, option) =>
     option === '转义'
-      ? value.includes('\\n')
+      ? hasStringEscapes(value)
         ? 'unescape'
         : 'escape'
       : undefined,
   hint: (option) =>
     option === '转义'
-      ? '粘贴时含字面量 \\n 自动反转义，否则自动转义；处理换行、Tab、双引号与反斜杠，不添加外层引号。'
+      ? '粘贴时含 \\n、\\t、\\" 或 \\\\ 自动反转义，否则自动转义；不添加外层引号。'
       : '将单引号字符串改为双引号字符串；不校验或修复 JSON。',
   actions: (option) =>
     option === '转义'

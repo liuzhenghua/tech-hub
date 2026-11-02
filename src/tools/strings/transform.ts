@@ -14,7 +14,7 @@ export function unescapeString(value: string) {
     '\\"': '"',
     '\\\\': '\\',
   };
-  return value.replace(/\\[nt"\\]/g, (match) => replacements[match]);
+  return value.replace(supportedEscapes, (match) => replacements[match]);
 }
 export function singleToDoubleQuotes(value: string) {
   let output = '',
@@ -56,4 +56,9 @@ export function transformString(value: string, action: string): string {
     default:
       throw Error('未知字符串操作');
   }
+}
+const supportedEscapes = /\\[nt"\\]/g;
+
+export function hasStringEscapes(value: string): boolean {
+  return value.search(supportedEscapes) !== -1;
 }

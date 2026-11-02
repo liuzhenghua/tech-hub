@@ -42,13 +42,18 @@ test('strings preserve Unicode and only supported escape sequences', () => {
   );
   assert.throws(() => transformString('bad', 'unsupported'));
 });
-test('string paste chooses unescape only for literal newline escapes in the escape tab', () => {
+test('string paste detects supported escape sequences only in the escape tab', () => {
   for (const [input, action, expected] of [
     ['first\\nsecond', 'unescape', 'first\nsecond'],
     ['first\nsecond', 'escape', 'first\\nsecond'],
     ['"text"\tvalue', 'escape', '\\"text\\"\\tvalue'],
     ['plain text', 'escape', 'plain text'],
-    ['first\\tsecond', 'escape', 'first\\\\tsecond'],
+    ['first\\tsecond', 'unescape', 'first\tsecond'],
+    ['say \\"hello\\"', 'unescape', 'say "hello"'],
+    [String.raw`C:\\folder\\file`, 'unescape', String.raw`C:\folder\file`],
+    [String.raw`unknown\q`, 'escape', String.raw`unknown\\q`],
+    [String.raw`\u4e2d`, 'escape', String.raw`\\u4e2d`],
+    [String.raw`first\\nsecond`, 'unescape', String.raw`first\nsecond`],
   ]) {
     assert.equal(stringsTool.pasteAction!(input, '转义'), action);
     assert.equal(transformString(input, action), expected);

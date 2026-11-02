@@ -35,6 +35,7 @@ export function mountEditor(
   }
   const events = new AbortController();
   const copyFeedback = createCopyFeedback();
+  const treeCopyFeedback = createCopyFeedback();
   let revision = 0,
     busy = false,
     treeMode = saved.tree !== false,
@@ -126,6 +127,7 @@ export function mountEditor(
     element<HTMLButtonElement>('copy').disabled = !output.value;
   }
   function clear() {
+    treeCopyFeedback.resetAll();
     message('');
     if (tool.id === 'crypto')
       root.querySelector('label[for="output"]')!.textContent = '处理结果';
@@ -174,7 +176,7 @@ export function mountEditor(
           action === 'encrypt' ? '密文' : '解密原文';
       }
       if (result.json) {
-        renderJSONTree(tree, JSON.parse(result.output));
+        renderJSONTree(tree, JSON.parse(result.output), treeCopyFeedback);
         if (action === 'minify') treeMode = false;
       }
       element('jwt-info').textContent = result.info || '';
@@ -465,7 +467,7 @@ export function mountEditor(
   view();
   if (tool.id === 'json' && output.value) {
     try {
-      renderJSONTree(tree, JSON.parse(output.value));
+      renderJSONTree(tree, JSON.parse(output.value), treeCopyFeedback);
     } catch {
       clear();
     }
@@ -475,6 +477,7 @@ export function mountEditor(
   return () => {
     disposed = true;
     copyFeedback.dispose();
+    treeCopyFeedback.dispose();
     revision++;
     events.abort();
     disposeOptionTabs();
