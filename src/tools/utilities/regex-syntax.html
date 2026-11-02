@@ -1,0 +1,205 @@
+<dialog
+  class="regex-syntax"
+  aria-labelledby="regex-syntax-title"
+  aria-describedby="regex-syntax-description"
+>
+  <div class="regex-syntax-head">
+    <div>
+      <h2 id="regex-syntax-title">正则语法速查</h2>
+      <p id="regex-syntax-description">
+        JavaScript 正则表达式 · 输入时不含外层 /，标志在工具栏选择。
+      </p>
+    </div>
+    <form method="dialog">
+      <button type="submit" autofocus aria-label="关闭语法速查">关闭</button>
+    </form>
+  </div>
+  <div class="regex-syntax-body">
+    <h3>字符与位置</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>语法</th>
+          <th>含义</th>
+          <th>示例</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>.</code></td>
+          <td>任意字符，默认不含换行</td>
+          <td><code>a.b</code> 匹配 <code>a-b</code></td>
+        </tr>
+        <tr>
+          <td><code>\d / \D</code></td>
+          <td>数字 0–9 / 非数字</td>
+          <td><code>\d+</code> 匹配 <code>2024</code></td>
+        </tr>
+        <tr>
+          <td><code>\w / \W</code></td>
+          <td>英文字母、数字、下划线 / 其余字符</td>
+          <td><code>\w+</code> 匹配 <code>user_1</code>，不含中文</td>
+        </tr>
+        <tr>
+          <td><code>\s / \S</code></td>
+          <td>空白（含换行、Tab）/ 非空白</td>
+          <td><code>\s+</code> 匹配连续空白</td>
+        </tr>
+        <tr>
+          <td><code>[abc] / [^abc]</code></td>
+          <td>字符集合 / 排除集合</td>
+          <td><code>[a-z]</code> 匹配小写英文字母</td>
+        </tr>
+        <tr>
+          <td><code>^ / $</code></td>
+          <td>输入开头 / 结尾；m 模式下也匹配行边界</td>
+          <td><code>^\d+</code> 匹配开头的数字</td>
+        </tr>
+        <tr>
+          <td><code>\b / \B</code></td>
+          <td>单词边界 / 非单词边界，以 \w 类字符为基础</td>
+          <td><code>\bcat\b</code> 不匹配 <code>scatter</code></td>
+        </tr>
+        <tr>
+          <td><code>\n / \r / \t</code></td>
+          <td>换行 / 回车 / 制表符</td>
+          <td><code>\r?\n</code> 匹配常见换行</td>
+        </tr>
+        <tr>
+          <td><code>\.</code>、<code>\\</code></td>
+          <td>转义元字符，匹配字面量点号、反斜杠</td>
+          <td><code>\.</code> 匹配 <code>.</code></td>
+        </tr>
+        <tr>
+          <td><code>\p{L}</code></td>
+          <td>Unicode 字母，需启用 u</td>
+          <td><code>\p{L}+</code> 可匹配中文、英文等字母文字</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>数量与贪婪模式</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>语法</th>
+          <th>含义</th>
+          <th>示例</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>* / + / ?</code></td>
+          <td>0 次及以上 / 1 次及以上 / 0 或 1 次</td>
+          <td><code>colou?r</code> 匹配 color、colour</td>
+        </tr>
+        <tr>
+          <td><code>{n} / {n,} / {n,m}</code></td>
+          <td>恰好 n 次 / 至少 n 次 / n 到 m 次</td>
+          <td><code>\d{2,4}</code> 匹配 2–4 位数字</td>
+        </tr>
+        <tr>
+          <td><code>*? / +? / ?? / {n,m}?</code></td>
+          <td>懒惰量词：尽量少匹配；默认量词尽量多匹配</td>
+          <td>
+            <code>&lt;.*?&gt;</code> 在 <code>&lt;a&gt;&lt;b&gt;</code> 中先匹配
+            <code>&lt;a&gt;</code>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>分组与断言</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>语法</th>
+          <th>含义</th>
+          <th>示例</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>a|b</code></td>
+          <td>匹配任一分支</td>
+          <td><code>cat|dog</code></td>
+        </tr>
+        <tr>
+          <td><code>(...)</code></td>
+          <td>捕获组，按左括号顺序编号</td>
+          <td><code>(\d{4})-(\d{2})</code></td>
+        </tr>
+        <tr>
+          <td><code>(?:...)</code></td>
+          <td>非捕获分组</td>
+          <td><code>(?:ab)+</code></td>
+        </tr>
+        <tr>
+          <td><code>(?&lt;name&gt;...)</code></td>
+          <td>命名捕获组</td>
+          <td><code>(?&lt;year&gt;\d{4})</code></td>
+        </tr>
+        <tr>
+          <td><code>\1</code>、<code>\k&lt;name&gt;</code></td>
+          <td>反向引用已捕获的内容</td>
+          <td><code>(\w+)\s+\1</code> 匹配重复单词</td>
+        </tr>
+        <tr>
+          <td><code>(?=...) / (?!...)</code></td>
+          <td>正向 / 负向先行断言，不消耗字符</td>
+          <td><code>\d+(?=元)</code> 只匹配“元”前的数字</td>
+        </tr>
+        <tr>
+          <td><code>(?&lt;=...) / (?&lt;!...)</code></td>
+          <td>正向 / 负向后行断言，不消耗字符</td>
+          <td><code>(?&lt;=￥)\d+</code> 只匹配“￥”后的数字</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>标志</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>标志</th>
+          <th>作用</th>
+          <th>注意</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>g</code></td>
+          <td>全局匹配</td>
+          <td>查找全部匹配，未启用时通常只返回第一个</td>
+        </tr>
+        <tr>
+          <td><code>i</code></td>
+          <td>忽略大小写</td>
+          <td><code>abc</code> 可匹配 <code>ABC</code></td>
+        </tr>
+        <tr>
+          <td><code>m</code></td>
+          <td>多行模式</td>
+          <td>改变 ^、$ 的行为，不让点号跨行</td>
+        </tr>
+        <tr>
+          <td><code>s</code></td>
+          <td>点号匹配换行</td>
+          <td><code>.</code> 也可跨行匹配</td>
+        </tr>
+        <tr>
+          <td><code>u</code></td>
+          <td>Unicode 模式</td>
+          <td>按 Unicode 码点处理，支持 \p{…}</td>
+        </tr>
+        <tr>
+          <td><code>y</code></td>
+          <td>粘连匹配</td>
+          <td>必须在当前位置匹配，失败时不会跳到后面搜索</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="regex-syntax-note">
+      本工具输入的是正则本身：匹配数字写 <code>\d+</code>，无需像 JavaScript
+      字符串字面量那样写成 <code>"\\d+"</code>。零宽匹配不消耗字符；位置按
+      UTF-16 计数，与 Unicode 码点数量可能不同。
+    </p>
+  </div>
+</dialog>

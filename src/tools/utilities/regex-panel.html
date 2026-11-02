@@ -1,0 +1,122 @@
+<section class="utility-pattern-panel">
+  <div class="utility-pattern-row">
+    <label for="regex-pattern">表达式</label>
+    <div class="regex-pattern-field">
+      <span aria-hidden="true">/</span
+      ><input
+        id="regex-pattern"
+        aria-describedby="regex-pattern-hint"
+        spellcheck="false"
+        placeholder="例如 (?&lt;year&gt;\d{4})-(?&lt;month&gt;\d{2})-(?&lt;day&gt;\d{2})"
+      /><span aria-hidden="true">/</span>
+    </div>
+    <button
+      id="regex-syntax-open"
+      class="utility-secondary"
+      type="button"
+      aria-haspopup="dialog"
+    >
+      语法速查
+    </button>
+  </div>
+  <div class="utility-pattern-row">
+    <span class="utility-control-label">标志</span>
+    <div class="regex-flags" role="group" aria-label="正则标志">
+      <label title="全局匹配"
+        ><input
+          type="checkbox"
+          name="regex-flag"
+          value="g"
+          aria-label="g 全局"
+          checked
+        />g</label
+      ><label title="忽略大小写"
+        ><input
+          type="checkbox"
+          name="regex-flag"
+          value="i"
+          aria-label="i 忽略大小写"
+        />i</label
+      ><label title="多行模式"
+        ><input
+          type="checkbox"
+          name="regex-flag"
+          value="m"
+          aria-label="m 多行"
+        />m</label
+      ><label title="点号匹配换行"
+        ><input
+          type="checkbox"
+          name="regex-flag"
+          value="s"
+          aria-label="s 跨行点号"
+        />s</label
+      ><label title="Unicode 模式"
+        ><input
+          type="checkbox"
+          name="regex-flag"
+          value="u"
+          aria-label="u Unicode"
+          checked
+        />u</label
+      ><label title="粘连匹配"
+        ><input
+          type="checkbox"
+          name="regex-flag"
+          value="y"
+          aria-label="y 粘连"
+        />y</label
+      >
+    </div>
+    <div class="actions">
+      <button id="regex-example" class="utility-secondary" type="button">
+        填入示例</button
+      ><button id="regex-clear" class="utility-secondary" type="button">
+        清空
+      </button>
+    </div>
+  </div>
+</section>
+<div class="utility-columns utility-regex-layout">
+  <section class="editor">
+    <div class="editor-head">
+      <label for="regex-text">测试文本</label>
+      <div class="editor-controls">
+        <button id="copy-regex-text" type="button" data-copy="regex-text">
+          复制测试文本
+        </button>
+      </div>
+    </div>
+    <textarea
+      id="regex-text"
+      spellcheck="false"
+      placeholder="输入用于匹配的文本…"
+    ></textarea>
+  </section>
+  <div class="utility-regex-results">
+    <section class="editor utility-regex-preview">
+      <div class="editor-head">
+        <h2>匹配高亮</h2>
+        <span class="utility-meta">实时预览</span>
+      </div>
+      <pre id="regex-highlight" class="regex-highlight"></pre>
+    </section>
+    <section class="editor utility-regex-details">
+      <div class="editor-head">
+        <h2>匹配详情</h2>
+        <span class="utility-meta">捕获组 · 位置</span>
+      </div>
+      <div id="regex-matches" class="regex-matches" aria-label="匹配详情"></div>
+    </section>
+  </div>
+</div>
+<p
+  id="utility-status"
+  class="utility-status"
+  role="status"
+  aria-live="polite"
+></p>
+<p id="regex-pattern-hint" class="utility-hint">
+  JavaScript 正则语法，表达式不含外层 /。位置从 0 开始，按 UTF-16
+  计数，结束位置不包含在匹配内。
+</p>

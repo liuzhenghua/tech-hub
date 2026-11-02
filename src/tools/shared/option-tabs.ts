@@ -5,7 +5,10 @@ export function mountOptionTabs(select: HTMLSelectElement): () => void {
   const group = document.createElement('div');
   group.className = 'option-tabs';
   group.setAttribute('role', 'group');
-  group.setAttribute('aria-label', label?.textContent || '选项');
+  group.setAttribute(
+    'aria-label',
+    select.getAttribute('aria-label') || label?.textContent || '选项',
+  );
   const events = new AbortController();
   const buttons = Array.from(select.options, (option) => {
     const button = document.createElement('button');

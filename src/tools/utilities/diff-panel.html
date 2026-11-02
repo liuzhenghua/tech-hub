@@ -1,0 +1,92 @@
+<div class="bottom-toolbar">
+  <div class="toolbar">
+    <select id="diff-mode" aria-label="对比类型">
+      <option value="text">文本</option>
+      <option value="json">JSON</option></select
+    ><select id="diff-view" aria-label="对比视图">
+      <option value="split">并排</option>
+      <option value="unified">合并</option></select
+    ><label class="utility-check"
+      ><input id="diff-hide" type="checkbox" />隐藏相同行</label
+    ><label class="utility-check"
+      ><input id="diff-wrap" type="checkbox" checked />自动换行</label
+    >
+  </div>
+  <div class="actions">
+    <button id="diff-edit" type="button">查看差异</button>
+    <button id="diff-swap" class="utility-secondary" type="button">
+      交换左右</button
+    ><button id="diff-clear" class="utility-secondary" type="button">
+      清空
+    </button>
+    <button
+      id="diff-fullscreen"
+      class="editor-icon utility-secondary"
+      type="button"
+      aria-label="全屏"
+      title="全屏"
+      aria-pressed="false"
+    ></button>
+  </div>
+</div>
+<section class="editor utility-diff-workbench">
+  <div class="utility-columns utility-diff-headings">
+    <section class="editor">
+      <div class="editor-head">
+        <label for="diff-left">原文</label>
+        <div class="editor-controls">
+          <button id="copy-left" type="button" data-copy="diff-left">
+            复制原文
+          </button>
+        </div>
+      </div>
+    </section>
+    <section class="editor">
+      <div class="editor-head">
+        <label for="diff-right">修改后</label>
+        <div class="editor-controls">
+          <button id="copy-right" type="button" data-copy="diff-right">
+            复制修改后
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div id="diff-inputs" class="utility-columns utility-diff-inputs">
+    <textarea
+      id="diff-left"
+      aria-label="原文"
+      spellcheck="false"
+      placeholder="粘贴原始文本…"
+    ></textarea>
+    <textarea
+      id="diff-right"
+      aria-label="修改后"
+      spellcheck="false"
+      placeholder="粘贴修改后的文本…"
+    ></textarea>
+  </div>
+  <div
+    id="diff-result"
+    class="diff-result"
+    aria-label="差异结果"
+    data-empty-message="两侧内容均为空。"
+    hidden
+  ></div>
+</section>
+<div class="utility-diff-statusbar">
+  <span id="diff-summary" class="utility-meta"></span>
+  <span
+    id="utility-status"
+    class="utility-status"
+    role="status"
+    aria-live="polite"
+  ></span>
+  <span
+    class="utility-diff-help"
+    tabindex="0"
+    aria-label="对比说明"
+    title="点击查看差异显示对比，点击编辑内容继续修改。JSON 模式排序对象属性，保留数组顺序；行号对应格式化后的内容。"
+    >对比说明 ⓘ</span
+  >
+</div>

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>开发辅助工具 · 文档与工具</title>
+    <link rel="stylesheet" href="../../style.css" />
+    <link rel="stylesheet" href="../../tool.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body class="tool-page utility-page">
+    <main>
+      <header class="tool-header">
+        <a class="back-button" href="../../#/tools">← 全部工具</a>
+        <h1 class="tool-switch" aria-label="工具切换">
+          <button type="button" data-mode="timestamp">时间戳转换</button
+          ><button type="button" data-mode="diff">文本 / JSON 对比</button
+          ><button type="button" data-mode="regex">正则表达式测试</button>
+        </h1>
+        <span>浏览器本地处理</span>
+      </header>
+      <div id="utility-panel"></div>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

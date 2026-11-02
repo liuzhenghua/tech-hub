@@ -10,6 +10,9 @@ export const toolIds = [
   'crypto',
   'generator',
   'pdf',
+  'timestamp',
+  'diff',
+  'regex',
 ] as const;
 export type ToolId = (typeof toolIds)[number];
 export function readUsage(): Partial<Record<ToolId, number>> {

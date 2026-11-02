@@ -1,0 +1,84 @@
+<div class="bottom-toolbar">
+  <div class="toolbar">
+    <span class="utility-control-label">时区</span
+    ><select id="time-zone" aria-label="时区">
+      <option value="local">本地时区</option>
+      <option value="utc">UTC</option></select
+    ><span id="zone-name" class="utility-meta"></span>
+  </div>
+  <div class="actions">
+    <button id="time-now" type="button">填入当前时间</button>
+  </div>
+</div>
+<div class="utility-columns utility-time">
+  <section class="editor">
+    <div class="editor-head">
+      <h2>时间戳 → 日期</h2>
+      <span class="utility-meta">Unix 时间戳</span>
+    </div>
+    <div class="utility-form">
+      <label for="timestamp">时间戳</label>
+      <div class="utility-input-row">
+        <input
+          id="timestamp"
+          inputmode="numeric"
+          placeholder="例如 1700000000"
+        /><select id="time-unit" aria-label="时间戳单位">
+          <option value="seconds">秒（s）</option>
+          <option value="milliseconds">毫秒（ms）</option>
+        </select>
+      </div>
+      <button id="time-convert" type="button">转换为日期</button>
+    </div>
+    <div class="editor-head utility-output-head">
+      <label for="date-output">日期结果</label>
+      <div class="editor-controls">
+        <button id="copy-date" type="button" data-copy="date-output">
+          复制日期
+        </button>
+      </div>
+    </div>
+    <textarea
+      id="date-output"
+      rows="4"
+      readonly
+      placeholder="转换后的日期会显示在这里"
+    ></textarea>
+  </section>
+  <section class="editor">
+    <div class="editor-head">
+      <h2>日期 → 时间戳</h2>
+      <span class="utility-meta">秒 / 毫秒</span>
+    </div>
+    <div class="utility-form">
+      <label for="date-input">日期（YYYY-MM-DD HH:mm:ss）</label
+      ><input id="date-input" placeholder="例如 2024-01-01 12:30:00" /><button
+        id="date-convert"
+        type="button"
+      >
+        转换为时间戳
+      </button>
+    </div>
+    <div class="editor-head utility-output-head">
+      <label for="stamp-output">时间戳结果</label>
+      <div class="editor-controls">
+        <button id="copy-stamp" type="button" data-copy="stamp-output">
+          复制时间戳
+        </button>
+      </div>
+    </div>
+    <textarea
+      id="stamp-output"
+      rows="4"
+      readonly
+      placeholder="转换后的秒和毫秒时间戳会显示在这里"
+    ></textarea>
+  </section>
+</div>
+<p
+  id="utility-status"
+  class="utility-status"
+  role="status"
+  aria-live="polite"
+></p>
+<p class="utility-hint">选择时间单位与时区后转换；日期按选定时区解释。</p>
