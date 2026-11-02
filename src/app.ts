@@ -2,6 +2,7 @@ import { config } from './config';
 import { parseRoute } from './routes';
 import { mountSiteHeader } from './components/site-header';
 import type { PageServices } from './pages/types';
+import { documentLoading } from './components/document-loading';
 
 const view = document.querySelector<HTMLElement>('#page-view')!;
 const header = mountSiteHeader(
@@ -38,6 +39,10 @@ async function mountTools() {
 }
 
 function loading() {
+  if (current === 'docs') {
+    view.replaceChildren(documentLoading('catalog'));
+    return;
+  }
   const message = document.createElement('p');
   message.setAttribute('role', 'status');
   message.textContent = '正在加载…';

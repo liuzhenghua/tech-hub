@@ -8,6 +8,7 @@ import { isDocumentPath } from '../document-paths';
 import { extractPreview } from './preview';
 import { parseFrontMatter } from './front-matter';
 import type { DocumentSession } from './session';
+import { documentLoading } from '../components/document-loading';
 export interface ReaderElements {
   body: HTMLElement;
   path: HTMLElement;
@@ -35,6 +36,7 @@ export function createReader(
     generation++;
     urls.splice(0).forEach((url) => URL.revokeObjectURL(url));
     elements.body.replaceChildren();
+    elements.body.removeAttribute('aria-busy');
     elements.path.textContent = '';
     elements.outline.replaceChildren();
     elements.outline.hidden = true;
@@ -45,7 +47,11 @@ export function createReader(
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     const id = generation,
       source = session.source;
-    status(session.cache?.get(path) ? '' : '正在加载文档…');
+    status('');
+    const loading = documentLoading('reader');
+    elements.path.textContent = path.split('/').join(' / ');
+    elements.body.setAttribute('aria-busy', 'true');
+    elements.body.append(loading);
     try {
       const markdown = await session.read(path);
       if (id !== generation) return;
@@ -175,6 +181,9 @@ export function createReader(
     } catch (error) {
       if (id === generation)
         status(error instanceof Error ? error.message : String(error));
+    } finally {
+      loading.remove();
+      if (id === generation) elements.body.removeAttribute('aria-busy');
     }
   }
   return { show, clear, snapshot: () => loaded, dispose: clear };

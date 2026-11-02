@@ -3,6 +3,7 @@ import type { DocumentSession } from './session';
 import type { DocumentGroup } from './groups';
 import { matchingGroupDocuments } from './groups';
 import { categoryOf } from './preview';
+import { documentLoading } from '../components/document-loading';
 
 export interface CatalogElements {
   categories: HTMLElement;
@@ -183,10 +184,9 @@ export function createCatalog(
         : `${groups.length} 篇主文档`;
     if (indexing) elements.total.textContent += ' · 更新中';
     for (const group of items) elements.files.append(cardFor(group, query));
-    if (!items.length)
-      elements.files.textContent = indexing
-        ? '正在加载文档…'
-        : '没有匹配的文档。';
+    if (!items.length && indexing)
+      elements.files.append(documentLoading('catalog'));
+    else if (!items.length) elements.files.textContent = '没有匹配的文档。';
     renderFailures();
   }
   async function index() {
