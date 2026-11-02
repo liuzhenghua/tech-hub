@@ -52,7 +52,7 @@ button {
   padding: 9px 16px;
 }
 button:disabled {
-  cursor: progress;
+  cursor: not-allowed;
   opacity: 0.65;
 }
 input,

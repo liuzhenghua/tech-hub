@@ -248,13 +248,19 @@ export function mountEditor(
     if (tool.reuseOutput) {
       root.querySelector('#reuse-output')?.remove();
       const reuse = document.createElement('button');
+      reuse.type = 'button';
       reuse.id = 'reuse-output';
       reuse.textContent = '用作输入';
       reuse.title = '用当前结果替换原文，继续处理';
       reuse.disabled = !output.value;
       reuse.onclick = () => {
+        if (busy || !output.value) return;
         input.value = output.value;
         inputChanged();
+        input.scrollTop = 0;
+        input.scrollLeft = 0;
+        input.focus({ preventScroll: true });
+        message('已用结果替换原文，请选择操作继续处理。');
       };
       output
         .closest('.editor')!
