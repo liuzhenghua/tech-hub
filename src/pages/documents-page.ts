@@ -98,7 +98,6 @@ export function mountPage(
     status(
       session.entries.length ? '正在后台检查文档更新…' : '正在解密并读取仓库…',
     );
-    const before = session.entries.find((entry) => entry.path === current)?.sha;
     try {
       if (
         !(await session.unlock(passphrase, save)) ||
@@ -111,11 +110,13 @@ export function mountPage(
       status('');
       if (current && !session.entries.some((entry) => entry.path === current))
         catalogView();
-      if (
-        current &&
-        before !== session.entries.find((entry) => entry.path === current)?.sha
-      )
-        void openDocument(current, '', false);
+      // Cached text may have rendered before the authenticated image source existed.
+      if (current)
+        void openDocument(
+          current,
+          parseRoute(location.hash, config.docsDir).anchor,
+          false,
+        );
       else navigate();
     } catch (error) {
       if (generation === unlocking && !disposed)

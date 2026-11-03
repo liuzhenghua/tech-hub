@@ -4,6 +4,7 @@ import type { DocumentGroup } from './groups';
 import { matchingGroupDocuments } from './groups';
 import { categoryOf } from './preview';
 import { documentLoading } from '../components/document-loading';
+import { compareModificationTimes } from './modification-times';
 
 export interface CatalogElements {
   categories: HTMLElement;
@@ -178,11 +179,14 @@ export function createCatalog(
           matchingGroupDocuments(group, (path) => session.preview(path), query)
             .length > 0),
     );
+    items.sort((a, b) => compareModificationTimes(a.entry, b.entry));
     elements.total.textContent =
       category || query
         ? `${items.length} / ${groups.length} 篇主文档`
         : `${groups.length} 篇主文档`;
     if (indexing) elements.total.textContent += ' · 更新中';
+    if (groups.some((group) => !Number.isFinite(group.entry.modifiedAt)))
+      elements.total.textContent += ' · 部分修改时间未获取';
     for (const group of items) elements.files.append(cardFor(group, query));
     if (!items.length && indexing)
       elements.files.append(documentLoading('catalog'));

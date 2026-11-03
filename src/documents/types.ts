@@ -7,6 +7,8 @@ export interface DocumentEntry {
   path: string;
   sha: string;
   type?: string;
+  modifiedAt?: number;
+  modifiedRef?: string;
 }
 export interface Preview {
   searchText?: string;
@@ -33,7 +35,7 @@ export interface RepositoryImage {
   content: string;
 }
 export interface DocumentSource {
-  list(): Promise<DocumentEntry[]>;
+  list(cached?: readonly DocumentEntry[]): Promise<DocumentEntry[]>;
   file(path: string): Promise<string>;
   file(path: string, raw: true): Promise<string>;
   file(path: string, raw: false): Promise<RepositoryImage>;

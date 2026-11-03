@@ -9,6 +9,7 @@ import { extractPreview } from './preview';
 import { parseFrontMatter } from './front-matter';
 import type { DocumentSession } from './session';
 import { documentLoading } from '../components/document-loading';
+import { prepareDocumentImages } from './images';
 export interface ReaderElements {
   body: HTMLElement;
   path: HTMLElement;
@@ -26,7 +27,7 @@ export function createReader(
   const actionButtons = document.querySelectorAll<HTMLButtonElement>(
     '#copy-markdown,#export-markdown,#export-bundle,#export-pdf',
   );
-  const urls: string[] = [];
+  let images: ReturnType<typeof prepareDocumentImages> | undefined;
   function clear() {
     loaded = null;
     onClear();
@@ -34,7 +35,8 @@ export function createReader(
       button.disabled = true;
     });
     generation++;
-    urls.splice(0).forEach((url) => URL.revokeObjectURL(url));
+    images?.dispose();
+    images = undefined;
     elements.body.replaceChildren();
     elements.body.removeAttribute('aria-busy');
     elements.path.textContent = '';
@@ -45,8 +47,7 @@ export function createReader(
     clear();
     // Reset before loading so the previous document's scroll position is not reused.
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    const id = generation,
-      source = session.source;
+    const id = generation;
     status('');
     const loading = documentLoading('reader');
     elements.path.textContent = path.split('/').join(' / ');
@@ -57,11 +58,12 @@ export function createReader(
       if (id !== generation) return;
       elements.path.textContent = path.split('/').join(' / ');
       const fragment = markdownFragment(parseFrontMatter(markdown).body);
-      const images = [...fragment.querySelectorAll('img')].map((img) => {
-        const src = img.getAttribute('src');
-        img.removeAttribute('src');
-        return { img, src };
-      });
+      images = prepareDocumentImages(
+        fragment,
+        path,
+        () => session.source,
+        () => id === generation,
+      );
       for (const node of fragment.querySelectorAll<HTMLAnchorElement>(
         'a[href]',
       )) {
@@ -97,6 +99,7 @@ export function createReader(
         } else node.removeAttribute('href');
       }
       elements.body.replaceChildren(fragment);
+      const imageLoading = images.load();
       enhanceCodeBlocks(elements.body, status);
       const ids = new Map<string, number>();
       for (const heading of elements.body.querySelectorAll<HTMLElement>(
@@ -130,44 +133,7 @@ export function createReader(
       } catch {
         if (id === generation) status('部分 Mermaid 图表无法渲染。');
       }
-      for (const { img, src } of images) {
-        if (id !== generation) return;
-        if (!src || /^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(src)) {
-          img.alt += '（外部图片未自动加载）';
-          continue;
-        }
-        if (!source) {
-          img.alt += '（联网后可加载）';
-          continue;
-        }
-        try {
-          const image = await source.file(
-            resolvePath(path, decodeURIComponent(src)),
-            false,
-          );
-          if (id !== generation) return;
-          const ext = image.path.split('.').pop()!.toLowerCase();
-          const type = (
-            {
-              png: 'image/png',
-              jpg: 'image/jpeg',
-              jpeg: 'image/jpeg',
-              gif: 'image/gif',
-              webp: 'image/webp',
-            } as Record<string, string>
-          )[ext];
-          if (!type || image.encoding !== 'base64') continue;
-          const bytes = Uint8Array.from(
-            atob(image.content.replace(/\s/g, '')),
-            (char) => char.charCodeAt(0),
-          );
-          const url = URL.createObjectURL(new Blob([bytes], { type }));
-          urls.push(url);
-          img.src = url;
-        } catch {
-          img.alt += '（加载失败）';
-        }
-      }
+      await imageLoading;
       if (id !== generation) return;
       loaded = { path, markdown };
       actionButtons.forEach((button) => {

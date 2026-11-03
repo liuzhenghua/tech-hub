@@ -56,7 +56,7 @@ export class DocumentSession {
     if (generation !== this.generation) return false;
     const candidate = this.connect(token);
     try {
-      const entries = await candidate.list();
+      const entries = await candidate.list(this.entries);
       if (generation !== this.generation) {
         candidate.close();
         return false;

@@ -1,4 +1,6 @@
 import { isDocumentPath } from '../document-paths';
+import { encodeBytes } from '../tools/shared/bytes';
+import { loadModificationTimes } from './modification-times';
 import type { RepositoryConfig, DocumentEntry, RepositoryImage } from './types';
 export class Repository {
   private controller: AbortController;
@@ -14,7 +16,10 @@ export class Repository {
     this.controller.abort();
     this.token = '';
   }
-  async request(path: string, raw = false): Promise<unknown> {
+  async request(
+    path: string,
+    raw: boolean | 'binary' = false,
+  ): Promise<unknown> {
     const { owner, repo } = this.config;
     const response = await fetch(
       `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}${path ? `/${path}` : ''}`,
@@ -41,9 +46,10 @@ export class Repository {
           } as Record<number, string>
         )[response.status] || `GitHub 请求失败（${response.status}）`,
       );
+    if (raw === 'binary') return response.arrayBuffer();
     return raw ? response.text() : response.json();
   }
-  async list() {
+  async list(cached: readonly DocumentEntry[] = []) {
     const meta = (await this.request('')) as { default_branch: string };
     this.branch = meta.default_branch;
     const ref = (await this.request(
@@ -56,19 +62,42 @@ export class Repository {
     };
     if (tree.truncated)
       throw Error('仓库目录过大，GitHub 返回了不完整的目录。');
-    return tree.tree.filter(
+    const entries = tree.tree.filter(
       (x) =>
         x.type === 'blob' &&
         isDocumentPath(x.path, this.config.docsDir ?? 'docs'),
     );
+    await loadModificationTimes(
+      entries,
+      cached,
+      this.ref,
+      async (path) => {
+        const params = new URLSearchParams({
+          path,
+          sha: this.ref,
+          per_page: '1',
+        });
+        const commits = (await this.request(`commits?${params}`)) as {
+          commit?: { committer?: { date?: string } };
+        }[];
+        return Date.parse(commits[0]?.commit?.committer?.date || '');
+      },
+      () => !this.controller.signal.aborted,
+    );
+    return entries;
   }
   file(path: string): Promise<string>;
   file(path: string, raw: true): Promise<string>;
   file(path: string, raw: false): Promise<RepositoryImage>;
   async file(path: string, raw = true): Promise<string | RepositoryImage> {
-    return this.request(
-      `contents/${path.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(this.ref)}`,
-      raw,
-    ) as Promise<string | RepositoryImage>;
+    const endpoint = `contents/${path.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(this.ref)}`;
+    if (raw) return this.request(endpoint, true) as Promise<string>;
+    // Raw responses preserve binary files, including images over the JSON API's 1 MB limit.
+    const content = (await this.request(endpoint, 'binary')) as ArrayBuffer;
+    return {
+      path,
+      encoding: 'base64',
+      content: encodeBytes(new Uint8Array(content), 'Base64'),
+    };
   }
 }

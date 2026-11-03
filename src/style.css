@@ -642,6 +642,30 @@ article {
   max-width: 100%;
   height: auto;
 }
+#document .document-image {
+  display: block;
+  max-width: 100%;
+}
+#document .document-image-placeholder {
+  display: flex;
+  min-height: clamp(140px, 25vw, 320px);
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  background: var(--surface-soft);
+  font-size: 14px;
+}
+#document .document-image-placeholder[hidden] {
+  display: none;
+}
+#document .document-image-placeholder button {
+  padding: 5px 12px;
+  font-size: inherit;
+}
 :is(#document, .markdown-body) table {
   display: block;
   overflow: auto;
