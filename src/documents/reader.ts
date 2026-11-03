@@ -25,7 +25,7 @@ export function createReader(
   let generation = 0;
   let loaded: { path: string; markdown: string } | null = null;
   const actionButtons = document.querySelectorAll<HTMLButtonElement>(
-    '#copy-markdown,#export-markdown,#export-bundle,#export-pdf',
+    '#copy-markdown,#export-markdown,#export-html,#export-bundle,#export-pdf',
   );
   let images: ReturnType<typeof prepareDocumentImages> | undefined;
   function clear() {

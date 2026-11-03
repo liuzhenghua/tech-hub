@@ -1,3 +1,5 @@
+import { mountHtmlExport } from './html-export';
+
 /** Copy/export the loaded source or print the already rendered document. */
 export function mountDocumentExport(
   snapshot: () => { path: string; markdown: string } | null,
@@ -5,6 +7,7 @@ export function mountDocumentExport(
 ): () => void {
   const menu = document.querySelector<HTMLDetailsElement>('#document-export')!;
   const events = new AbortController();
+  const disposeHtmlExport = mountHtmlExport(snapshot, status);
   document.getElementById('copy-markdown')!.addEventListener(
     'click',
     async () => {
@@ -71,5 +74,8 @@ export function mountDocumentExport(
     },
     { signal: events.signal },
   );
-  return () => events.abort();
+  return () => {
+    events.abort();
+    disposeHtmlExport();
+  };
 }
