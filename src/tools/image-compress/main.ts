@@ -1,4 +1,5 @@
 import { mountComparison } from './comparison';
+import { copyImage } from './clipboard';
 import { recordUsage } from '../../tool-usage';
 import { mountImageInput } from '../image-shared/input';
 import {
@@ -24,6 +25,8 @@ const quality = $<HTMLInputElement>('quality'),
   edge = $<HTMLInputElement>('max-edge');
 const format = $<HTMLSelectElement>('output-format');
 const download = $<HTMLButtonElement>('download-compressed');
+const copy = $<HTMLButtonElement>('copy-compressed');
+let copying = false;
 let generation = 0,
   timer: ReturnType<typeof setTimeout> | undefined;
 let result: {
@@ -47,6 +50,7 @@ function cancel() {
   generation++;
   clearTimeout(timer);
   download.disabled = true;
+  copy.disabled = true;
 }
 function receive(asset: ImageAsset | null) {
   cancel();
@@ -112,6 +116,7 @@ function showResult(
   $('larger-note').hidden = blob.size <= asset.file.size;
   $('encoding-note').hidden = true;
   download.disabled = false;
+  copy.disabled = copying;
   comparison.update();
 }
 async function process(id: number) {
@@ -194,6 +199,29 @@ download.addEventListener(
   },
   { signal: events.signal },
 );
+async function copyResult() {
+  if (!result || copy.disabled) return;
+  const current = result;
+  const id = generation;
+  copying = true;
+  copy.disabled = true;
+  copy.textContent = '正在复制…';
+  try {
+    await copyImage(current.blob);
+    if (id === generation)
+      $('status').textContent = '已复制图片，可直接粘贴到聊天或文档中。';
+  } catch {
+    if (id === generation)
+      $('status').textContent = '复制失败，请允许剪贴板访问，或下载图片。';
+  } finally {
+    copying = false;
+    copy.textContent = '复制图片';
+    copy.disabled = !result || download.disabled || events.signal.aborted;
+  }
+}
+copy.addEventListener('click', () => void copyResult(), {
+  signal: events.signal,
+});
 function dispose() {
   cancel();
   events.abort();
