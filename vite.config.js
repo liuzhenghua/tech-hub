@@ -24,6 +24,8 @@ export default defineConfig({
             'crypto',
             'pdf',
             'utilities',
+            'image-crop',
+            'image-compress',
           ].map((name) => [
             name,
             fileURLToPath(

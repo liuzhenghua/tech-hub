@@ -10,6 +10,8 @@ export const toolIds = [
   'crypto',
   'generator',
   'pdf',
+  'image-crop',
+  'image-compress',
   'timestamp',
   'diff',
   'regex',

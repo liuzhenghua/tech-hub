@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>图片压缩 · 文档与工具</title>
+    <link rel="stylesheet" href="../../style.css" />
+    <link rel="stylesheet" href="../image-shared/style.css" />
+  </head>
+  <body class="image-tool-page">
+    <main class="image-tools">
+      <header class="tool-header">
+        <a href="../../#/tools" class="back-button">← 全部工具</a>
+        <h1 class="tool-switch" aria-label="工具切换">
+          <a href="../image-crop/">图片裁剪</a
+          ><a href="../image-compress/" aria-current="page">图片压缩</a>
+        </h1>
+        <span>浏览器本地处理 · 不上传图片</span>
+      </header>
+      <input
+        id="file-input"
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        hidden
+      />
+      <section id="empty" class="image-empty">
+        <div class="upload-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 8V4h4m8 0h4v4m0 8v4h-4M8 20H4v-4M4 12h16M12 4v16" />
+          </svg>
+        </div>
+        <h2>把图片拖到这里</h2>
+        <p>也可以选择文件，或直接粘贴剪贴板图片</p>
+        <button id="choose-file" class="image-primary">选择图片</button
+        ><small
+          >PNG、JPEG、WebP · 单张最大 30 MB<br />最长边 ≤ 8192 px，总像素 ≤ 2400
+          万；动画仅保留首帧</small
+        >
+        <div class="empty-features">
+          <span>WebP / JPEG</span><span>实时体积对比</span
+          ><span>原尺寸查看细节</span>
+        </div>
+      </section>
+      <section id="workspace" hidden>
+        <div class="image-filebar">
+          <div class="file-identity">
+            <span class="file-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M4 8V4h4m8 0h4v4m0 8v4h-4M8 20H4v-4M4 12h16M12 4v16"
+                /></svg
+            ></span>
+            <div>
+              <strong id="file-name"></strong><span id="file-meta"></span>
+            </div>
+          </div>
+          <div class="file-actions">
+            <button id="replace-file" class="image-secondary">更换图片</button
+            ><button id="clear-file" class="image-quiet">移除</button>
+          </div>
+        </div>
+        <div class="image-layout">
+          <section class="image-preview-panel">
+            <div class="preview-topline">
+              <span>画质对比</span>
+              <div class="view-options" role="group" aria-label="预览缩放">
+                <button id="view-fit" aria-pressed="true">适应画布</button
+                ><button id="view-actual" aria-pressed="false">100%</button>
+              </div>
+            </div>
+            <div id="comparison-scroll" class="comparison-scroll checkerboard">
+              <div id="comparison-stage" class="comparison-stage">
+                <img id="result-image" alt="压缩后的图片" draggable="false" />
+                <div id="original-overlay" class="original-overlay">
+                  <img id="original-image" alt="原始图片" draggable="false" />
+                </div>
+                <span class="comparison-label label-original">原图</span
+                ><span class="comparison-label label-result">压缩后</span
+                ><button
+                  id="compare-handle"
+                  class="comparison-line"
+                  type="button"
+                  aria-label="拖动原图与压缩结果对比"
+                >
+                  <span aria-hidden="true">↔</span></button
+                ><span id="encoding-note" class="encoding-note" role="status"
+                  >正在生成预览…</span
+                >
+              </div>
+            </div>
+            <div class="comparison-control">
+              <label for="compare-position">原图</label
+              ><input
+                id="compare-position"
+                aria-label="原图与压缩结果对比位置"
+                type="range"
+                min="0"
+                max="100"
+                value="50"
+              /><span>压缩后</span>
+            </div>
+            <p class="canvas-hint">
+              拖动中间手柄或底部滑杆比较画质；100% 按输出像素查看细节。
+            </p>
+          </section>
+          <aside class="image-settings">
+            <section class="compression-summary">
+              <span class="summary-eyebrow">压缩结果</span
+              ><strong id="saving-value">计算中…</strong>
+              <div class="size-comparison">
+                <div><span>原图</span><b id="original-size">—</b></div>
+                <span>→</span>
+                <div><span>压缩后</span><b id="result-size">—</b></div>
+              </div>
+              <p id="result-dimensions" class="setting-note"></p>
+              <p id="larger-note" class="larger-note" hidden>
+                结果比原图更大。可以降低质量、缩小尺寸，或保留原图。
+              </p>
+            </section>
+            <section class="settings-section">
+              <label class="setting-label" for="output-format">输出格式</label
+              ><select id="output-format">
+                <option value="image/webp">WebP · 推荐</option>
+                <option value="image/jpeg">JPEG · 通用格式</option>
+              </select>
+              <p id="format-note" class="setting-note">
+                支持透明背景，适合网页图片与截图。
+              </p>
+            </section>
+            <section class="settings-section">
+              <h2>压缩偏好</h2>
+              <div
+                id="quality-presets"
+                class="quality-presets"
+                role="group"
+                aria-label="压缩偏好"
+              >
+                <button data-quality="90" aria-pressed="false">清晰优先</button
+                ><button data-quality="80" aria-pressed="true">均衡</button
+                ><button data-quality="60" aria-pressed="false">
+                  体积优先
+                </button>
+              </div>
+              <label class="range-label" for="quality"
+                >质量 <output id="quality-value">80</output></label
+              ><input id="quality" type="range" min="10" max="100" value="80" />
+              <div class="range-endpoints">
+                <span>更小体积</span><span>更多细节</span>
+              </div>
+            </section>
+            <section class="settings-section">
+              <label class="setting-label" for="max-edge"
+                >最长边 <span>px</span></label
+              ><input
+                id="max-edge"
+                type="number"
+                min="1"
+                max="8192"
+                step="1"
+                inputmode="numeric"
+              />
+              <div class="dimension-presets" role="group" aria-label="输出尺寸">
+                <button data-edge="0">原尺寸</button
+                ><button data-edge="1920">1920 px</button
+                ><button data-edge="1280">1280 px</button>
+              </div>
+              <p class="setting-note">
+                等比缩小，不放大。先保持原尺寸，观察压缩效果。
+              </p>
+            </section>
+            <section class="settings-section">
+              <button
+                id="download-compressed"
+                class="image-primary full-width"
+                disabled
+              >
+                下载 WebP</button
+              ><button id="retry-compress" class="image-quiet full-width">
+                重新生成
+              </button>
+              <p class="setting-note">
+                导出移除图片元数据。节省比例以实际结果为准。
+              </p>
+            </section>
+          </aside>
+        </div>
+      </section>
+      <p id="status" class="image-status" role="status" aria-live="polite"></p>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

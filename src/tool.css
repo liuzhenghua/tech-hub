@@ -1,3 +1,5 @@
+@import './tools/shared/tool-header.css';
+
 /* Shared site tokens and controls come from style.css. */
 .tool-page {
   --panel: var(--surface);
@@ -21,32 +23,6 @@
   flex: 1;
   min-height: 0;
   gap: 12px;
-}
-.tool-header {
-  position: static;
-  max-width: none;
-  padding: 0 0 12px;
-  margin: 0;
-  justify-content: flex-start;
-}
-.tool-header .back-button {
-  display: inline-flex;
-  align-items: center;
-  margin: 0;
-  padding: 0;
-  line-height: 1.4;
-  font-size: 14px;
-  white-space: nowrap;
-}
-.tool-header h1 {
-  line-height: 1.4;
-  font-size: 20px;
-  margin: 0;
-}
-.tool-header > span {
-  margin-left: auto;
-  font-size: 12px;
-  color: var(--muted);
 }
 .tool-page .editors {
   flex: 1;
@@ -419,12 +395,6 @@
   .tool-page[data-tool='digest'] .editor:last-child {
     min-height: 160px;
   }
-  .tool-header > span {
-    display: none;
-  }
-  .tool-header {
-    flex-wrap: wrap;
-  }
 }
 
 .tool-page #rsa-controls,
@@ -737,23 +707,4 @@
   height: auto;
   background: white;
   box-shadow: 0 2px 12px #0002;
-}
-
-.tool-header .tool-switch {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-.tool-switch button {
-  background: transparent;
-  color: var(--muted);
-  border-color: transparent;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-  padding: 4px 8px;
-}
-.tool-switch button[aria-pressed='true'] {
-  background: var(--accent);
-  color: white;
 }

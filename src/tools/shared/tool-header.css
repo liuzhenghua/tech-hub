@@ -1,0 +1,58 @@
+.tool-header {
+  position: static;
+  max-width: none;
+  padding: 0 0 12px;
+  margin: 0;
+  justify-content: flex-start;
+}
+.tool-header .back-button {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  line-height: 1.4;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.tool-header h1 {
+  line-height: 1.4;
+  font-size: 20px;
+  margin: 0;
+}
+.tool-header > span {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--muted);
+}
+.tool-header .tool-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.tool-header .tool-switch :is(button, a) {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  min-height: 32px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  padding: 4px 8px;
+}
+.tool-header .tool-switch button[aria-pressed='true'],
+.tool-header .tool-switch a[aria-current='page'] {
+  background: var(--accent);
+  color: white;
+}
+
+@media (max-width: 700px) {
+  .tool-header > span {
+    display: none;
+  }
+  .tool-header {
+    flex-wrap: wrap;
+  }
+}
