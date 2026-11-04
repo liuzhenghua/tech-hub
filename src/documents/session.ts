@@ -18,6 +18,7 @@ export class DocumentSession {
   readonly previews = new Map<string, Preview>();
   private generation = 0;
   private remember = false;
+  private reads = new Map<string, Promise<string>>();
   private indexTask: { generation: number; promise: Promise<string[]> } | null =
     null;
   readonly cache: DocumentCache | null;
@@ -63,6 +64,7 @@ export class DocumentSession {
       }
       this.source?.close();
       this.source = candidate;
+      this.reads.clear();
       this.entries = entries;
       this.remember = remember;
       const shas = new Map(entries.map((entry) => [entry.path, entry.sha]));
@@ -84,7 +86,13 @@ export class DocumentSession {
     const cached = this.remember ? this.cache?.get(path) : undefined;
     if (cached) return cached.markdown;
     if (!this.source) throw Error('正在连接仓库，未缓存的文档需要联网读取。');
-    return this.source.file(path);
+    const pending = this.reads.get(path);
+    if (pending) return pending;
+    const task = this.source.file(path).finally(() => {
+      if (this.reads.get(path) === task) this.reads.delete(path);
+    });
+    this.reads.set(path, task);
+    return task;
   }
   preview(path: string): Preview | undefined {
     return (
@@ -105,15 +113,26 @@ export class DocumentSession {
       return this.indexTask.promise;
     const generation = this.generation;
     const source = this.source;
-    const promise = buildDocumentIndex(
+    const index = buildDocumentIndex(
       this.entries,
       (path) => this.preview(path),
       (path) => this.read(path),
       (path, markdown) => this.record(path, markdown, extractPreview(markdown)),
       () => generation === this.generation && source === this.source,
-    ).finally(() => {
-      if (this.indexTask?.promise === promise) this.indexTask = null;
+    );
+    const times = source?.modificationTimes?.(this.entries).then(() => {
+      if (
+        generation === this.generation &&
+        source === this.source &&
+        this.remember
+      )
+        this.cache?.index(this.entries);
     });
+    const promise = Promise.all([index, times])
+      .then(([missing]) => missing)
+      .finally(() => {
+        if (this.indexTask?.promise === promise) this.indexTask = null;
+      });
     this.indexTask = { generation, promise };
     return promise;
   }
@@ -131,6 +150,7 @@ export class DocumentSession {
     this.generation++;
     this.source?.close();
     this.source = null;
+    this.reads.clear();
     this.entries = [];
     this.previews.clear();
     this.remember = false;
@@ -149,5 +169,6 @@ export class DocumentSession {
     this.generation++;
     this.source?.close();
     this.source = null;
+    this.reads.clear();
   }
 }

@@ -117,6 +117,46 @@
               <p id="larger-note" class="larger-note" hidden>
                 结果比原图更大。可以降低质量、缩小尺寸，或保留原图。
               </p>
+              <details class="compression-help">
+                <summary>
+                  <span aria-hidden="true">?</span>为什么能压这么小？
+                </summary>
+                <div class="compression-help-content">
+                  <p>
+                    <strong>像素尺寸相同，存储方式可以不同。</strong>1672 × 941
+                    表示像素数量，KB / MB
+                    表示保存这些像素需要的字节数。只要不缩小最长边，图片的宽高就保持不变。
+                  </p>
+                  <h3>减少重复，也舍弃细微差别</h3>
+                  <p>
+                    WebP
+                    会利用相邻像素的相似性，预测颜色并记录差值，再把这些数据紧凑编码。当前
+                    WebP / JPEG
+                    压缩采用有损编码，还会简化部分颜色与细节，让文件更小。
+                  </p>
+                  <h3>为什么截图可能节省 90% 以上？</h3>
+                  <p>
+                    白底、色块和重复图形容易被高效编码。从保留每个像素的 PNG
+                    转为有损 WebP
+                    时，文件可能大幅变小，同时在常见显示尺寸下看起来接近原图。照片、噪点较多或已经压缩过的图片，收益通常不同；90%
+                    不是固定效果。
+                  </p>
+                  <h3>看起来相近，不等于像素完全相同</h3>
+                  <p>
+                    质量 80 既不表示保留 80% 画质，也不表示压缩 80%；质量 100
+                    也不保证无损。建议切换「100%」，拖动对比手柄检查小字、彩色细线与边缘。反复有损压缩会累积损失，调整参数时尽量使用原图。
+                  </p>
+                  <p class="compression-help-footnote">
+                    本工具也会移除原有元数据，但大幅缩小体积通常主要来自重新编码。需要逐像素保真时，应保留原图或选择专门的无损压缩。
+                  </p>
+                  <a
+                    href="https://developers.google.com/speed/webp/docs/compression"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >了解 WebP 压缩原理 ↗</a
+                  >
+                </div>
+              </details>
             </section>
             <section class="settings-section">
               <label class="setting-label" for="output-format">输出格式</label

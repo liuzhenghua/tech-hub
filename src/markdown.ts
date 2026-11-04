@@ -1,29 +1,35 @@
 import { createCopyFeedback } from './copy-feedback';
-import { marked } from 'marked';
+import { mathMarkdown } from './math-markdown';
+import { renderMath } from './math';
 import DOMPurify from 'dompurify';
 import hljs from 'highlight.js/lib/common';
 import 'highlight.js/styles/github.css';
 import { enhanceDiagrams } from './diagrams';
 export function markdownFragment(markdown: string) {
-  return DOMPurify.sanitize(marked.parse(markdown, { async: false }), {
-    RETURN_DOM_FRAGMENT: true,
-    FORBID_TAGS: [
-      'style',
-      'iframe',
-      'form',
-      'input',
-      'video',
-      'audio',
-      'source',
-      'svg',
-      'math',
-      'link',
-      'object',
-      'embed',
-      'picture',
-    ],
-    FORBID_ATTR: ['style', 'srcset'],
-  });
+  const fragment = DOMPurify.sanitize(
+    mathMarkdown.parse(markdown, { async: false }),
+    {
+      RETURN_DOM_FRAGMENT: true,
+      FORBID_TAGS: [
+        'style',
+        'iframe',
+        'form',
+        'input',
+        'video',
+        'audio',
+        'source',
+        'svg',
+        'math',
+        'link',
+        'object',
+        'embed',
+        'picture',
+      ],
+      FORBID_ATTR: ['style', 'srcset'],
+    },
+  );
+  renderMath(fragment);
+  return fragment;
 }
 export function enhanceCodeBlocks(
   root: HTMLElement,

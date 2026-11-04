@@ -39,6 +39,7 @@ export interface DocumentSource {
   file(path: string): Promise<string>;
   file(path: string, raw: true): Promise<string>;
   file(path: string, raw: false): Promise<RepositoryImage>;
+  modificationTimes?(entries: DocumentEntry[]): Promise<void>;
   close(): void;
 }
 export type BrowserStorage = Pick<

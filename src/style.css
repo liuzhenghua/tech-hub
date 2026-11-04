@@ -111,13 +111,48 @@ header {
   border-bottom: 1px solid var(--line);
 }
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
   flex-shrink: 0;
-  font-weight: 800;
+  font-weight: 700;
   font-size: 23px;
-  letter-spacing: -1px;
+  letter-spacing: -0.5px;
 }
-.brand span {
-  color: #71866f;
+.page-title-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #d6e2d5;
+  border-radius: 12px;
+  color: var(--accent);
+  background: var(--surface-soft);
+}
+.page-title-icon svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#site-header > nav a {
+  padding: 0 10px;
+  border-radius: 6px;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+#site-header > nav a:hover {
+  color: var(--accent);
+  background: var(--surface-soft);
+}
+#site-header > nav a[aria-current='page']::after {
+  left: 10px;
+  right: 10px;
 }
 nav {
   display: flex;
@@ -167,6 +202,10 @@ main {
   margin: 0;
   font-size: 20px;
 }
+.catalog-summary {
+  justify-content: flex-end;
+  margin: 16px 0 12px;
+}
 .section-title span {
   color: var(--muted);
   font-size: 12px;
@@ -188,41 +227,6 @@ footer {
 }
 
 /* Tool cards: 1 / 2 / 3 columns */
-.tool-search {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: min(320px, 100%);
-  padding: 0 12px;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  background: var(--surface);
-  color: var(--muted);
-}
-.tool-search:focus-within {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-.tool-search svg {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.6;
-}
-.tool-search input {
-  min-width: 0;
-  width: 100%;
-  min-height: 40px;
-  padding: 8px 0;
-  border: 0;
-  background: transparent;
-  font-size: 13px;
-}
-.tool-search input:focus-visible {
-  outline: none;
-}
 .tool-empty {
   padding: 36px 16px;
   text-align: center;
@@ -242,6 +246,7 @@ footer {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
+  box-shadow: 0 2px 6px #243b2804;
   padding: 24px;
   transition:
     border-color 0.15s,
@@ -279,6 +284,7 @@ footer {
   stroke-linejoin: round;
 }
 .tool p {
+  color: var(--ink);
   flex: 1;
   font-size: 13px;
   line-height: 1.8;
@@ -286,14 +292,6 @@ footer {
   min-height: 3.6em;
 }
 @media screen and (max-width: 600px) {
-  #tools-page > .section-title {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 14px;
-  }
-  .tool-search {
-    width: 100%;
-  }
   .tool {
     padding: 20px;
   }
@@ -367,12 +365,14 @@ footer {
   justify-content: space-between;
   margin-bottom: 16px;
 }
-#categories {
+#categories,
+.tool-categories {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
-#categories button {
+#categories button,
+.tool-categories button {
   background: transparent;
   border: 1px solid var(--line);
   border-radius: 20px;
@@ -380,12 +380,14 @@ footer {
   padding: 5px 13px;
   font-size: 12px;
 }
-#categories button[aria-pressed='true'] {
+#categories button[aria-pressed='true'],
+.tool-categories button[aria-pressed='true'] {
   background: var(--accent);
   border-color: var(--accent);
   color: white;
 }
-#search {
+#search,
+#tool-search {
   width: 240px;
   flex-shrink: 0;
   min-height: 36px;
@@ -474,6 +476,7 @@ footer {
   color: var(--ink);
   border: 1px solid var(--line);
   border-radius: var(--radius);
+  box-shadow: 0 2px 6px #243b2804;
   padding: 22px;
   transition:
     border-color 0.15s,
@@ -491,6 +494,7 @@ footer {
   overflow-wrap: anywhere;
 }
 .document-card h3 {
+  margin: 0;
   font-size: 16px;
   line-height: 1.6;
   overflow-wrap: anywhere;
@@ -566,6 +570,11 @@ article {
 #document {
   max-width: 760px;
   margin: 0;
+}
+.math-formula[data-display='true'] {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 0;
 }
 :is(#document, .markdown-body) {
   color: var(--ink);
@@ -720,7 +729,8 @@ article {
     flex-direction: column;
     gap: 14px;
   }
-  #search {
+  #search,
+  #tool-search {
     width: 100%;
   }
   .document-grid {
@@ -731,6 +741,24 @@ article {
   }
 }
 @media screen and (max-width: 480px) {
+  #site-header {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+  }
+  #site-header > nav {
+    margin-left: auto;
+    gap: 4px;
+  }
+  .brand {
+    font-size: 20px;
+    gap: 9px;
+  }
+  .page-title-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
   header {
     align-items: flex-start;
     gap: 8px;
@@ -767,7 +795,7 @@ article {
 
 .document-card .document-excerpt {
   margin: 0;
-  color: var(--muted);
+  color: var(--ink);
   font-size: 13px;
   line-height: 1.8;
   display: -webkit-box;

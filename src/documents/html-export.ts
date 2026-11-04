@@ -1,6 +1,7 @@
 import DOMPurify from 'dompurify';
 import { encodeBytes } from '../tools/shared/bytes';
 import { htmlPage } from './html-page';
+import { offlineMath } from '../math';
 
 async function embedImage(image: HTMLImageElement, signal: AbortSignal) {
   const src = image.getAttribute('src');
@@ -54,6 +55,7 @@ export async function exportDocumentHtml(
     throw Error('部分 Mermaid 图表未渲染成功，请重新打开文档后再导出 HTML。');
   });
   cleanLinks(clone);
+  offlineMath(clone);
   for (const node of clone.querySelectorAll('*')) {
     for (const attribute of [...node.attributes]) {
       if (attribute.name.startsWith('data-'))
@@ -62,6 +64,8 @@ export async function exportDocumentHtml(
   }
   const content = DOMPurify.sanitize(clone.innerHTML, {
     ADD_TAGS: ['foreignObject'],
+    // Mermaid flowchart labels are HTML children inside SVG foreignObject elements.
+    HTML_INTEGRATION_POINTS: { foreignobject: true, 'annotation-xml': true },
     FORBID_TAGS: [
       'script',
       'iframe',

@@ -5,10 +5,7 @@ import type { PageServices } from './pages/types';
 import { documentLoading } from './components/document-loading';
 
 const view = document.querySelector<HTMLElement>('#page-view')!;
-const header = mountSiteHeader(
-  document.querySelector('#site-header')!,
-  config.title,
-);
+const header = mountSiteHeader(document.querySelector('#site-header')!);
 document.querySelector('#footer-brand')!.textContent = config.title;
 const events = new AbortController();
 let generation = 0;

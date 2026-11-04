@@ -37,7 +37,7 @@ test('relative document paths resolve within repository', () => {
     'docs/fe/node.md',
   );
 });
-test('repository requests pin content to commit, authenticate and do not cache', async () => {
+test('repository checks the default HEAD and caches immutable content', async () => {
   const original = globalThis.fetch;
   const calls = [];
   globalThis.fetch = async (url, options) => {
@@ -45,30 +45,34 @@ test('repository requests pin content to commit, authenticate and do not cache',
     return {
       ok: true,
       json: async () =>
-        url.endsWith('/tech')
-          ? { default_branch: 'main' }
-          : url.includes('/git/ref/')
-            ? { object: { sha: 'commit123' } }
-            : {
-                tree: [
-                  { type: 'blob', path: 'docs/a.md' },
-                  { type: 'blob', path: '.env' },
-                  { type: 'blob', path: 'tools/README.md' },
-                  { type: 'blob', path: 'infra/README.md' },
-                  { type: 'blob', path: 'examples/README.md' },
-                ],
-              },
+        url.includes('/commits?')
+          ? [{ sha: 'a'.repeat(40) }]
+          : {
+              tree: [
+                { type: 'blob', path: 'docs/a.md' },
+                { type: 'blob', path: '.env' },
+                { type: 'blob', path: 'tools/README.md' },
+                { type: 'blob', path: 'infra/README.md' },
+                { type: 'blob', path: 'examples/README.md' },
+              ],
+            },
       text: async () => '# hello',
     };
   };
   try {
     const repo = new Repository({ owner: 'user', repo: 'tech' }, 'fake');
     assert.equal((await repo.list()).length, 1);
-    assert.equal(calls[0][0], 'https://api.github.com/repos/user/tech');
+    assert.equal(
+      calls[0][0],
+      'https://api.github.com/repos/user/tech/commits?per_page=1',
+    );
+    assert.equal(calls.length, 2);
+    assert.equal(calls[0][1].cache, 'no-cache');
+    assert.equal(calls[1][1].cache, 'default');
     await repo.file('docs/a.md');
-    assert.match(calls.at(-1)[0], /ref=commit123/);
+    assert.match(calls.at(-1)[0], /ref=a{40}/);
     assert.equal(calls.at(-1)[1].headers.Authorization, 'Bearer fake');
-    assert.equal(calls.at(-1)[1].cache, 'no-store');
+    assert.equal(calls.at(-1)[1].cache, 'default');
     repo.close();
     assert.equal(repo.token, '');
     assert.equal(repo.controller.signal.aborted, true);

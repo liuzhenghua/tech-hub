@@ -151,3 +151,30 @@ test('leaving a route invalidates pending unlock while keeping the active sessio
   assert.equal(await session.read('docs/a.md'), '# docs/a.md');
   session.dispose();
 });
+
+test('concurrent indexing and reading share a document request without retaining failed reads', async () => {
+  const candidate = source([{ path: 'docs/a.md', sha: 'one' }]);
+  let calls = 0;
+  candidate.file = (() => {
+    calls++;
+    return Promise.resolve('# A');
+  }) as DocumentSource['file'];
+  const session = new DocumentSession(
+    config,
+    null,
+    () => candidate,
+    async () => 'token',
+  );
+  await session.unlock('secret', false);
+  assert.deepEqual(
+    await Promise.all([session.read('docs/a.md'), session.read('docs/a.md')]),
+    ['# A', '# A'],
+  );
+  assert.equal(calls, 1);
+  candidate.file = (() =>
+    Promise.reject(Error('offline'))) as DocumentSource['file'];
+  await assert.rejects(session.read('docs/b.md'), /offline/);
+  candidate.file = (() => Promise.resolve('retry')) as DocumentSource['file'];
+  assert.equal(await session.read('docs/b.md'), 'retry');
+  session.dispose();
+});

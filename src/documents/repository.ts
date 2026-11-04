@@ -1,11 +1,13 @@
 import { isDocumentPath } from '../document-paths';
 import { encodeBytes } from '../tools/shared/bytes';
 import { loadModificationTimes } from './modification-times';
+import { ImageCache } from './image-cache';
 import type { RepositoryConfig, DocumentEntry, RepositoryImage } from './types';
 export class Repository {
   private controller: AbortController;
-  branch = '';
+  private images = new ImageCache();
   ref = '';
+  private previous: readonly DocumentEntry[] = [];
   constructor(
     public config: RepositoryConfig,
     public token: string,
@@ -14,11 +16,13 @@ export class Repository {
   }
   close() {
     this.controller.abort();
+    this.images.clear();
     this.token = '';
   }
   async request(
     path: string,
     raw: boolean | 'binary' = false,
+    cache: RequestCache = 'no-store',
   ): Promise<unknown> {
     const { owner, repo } = this.config;
     const response = await fetch(
@@ -30,7 +34,8 @@ export class Repository {
             ? 'application/vnd.github.raw+json'
             : 'application/vnd.github+json',
         },
-        cache: 'no-store',
+        // Versioned resources opt into HTTP caching; moving refs are revalidated.
+        cache,
         signal: this.controller.signal,
       },
     );
@@ -50,13 +55,20 @@ export class Repository {
     return raw ? response.text() : response.json();
   }
   async list(cached: readonly DocumentEntry[] = []) {
-    const meta = (await this.request('')) as { default_branch: string };
-    this.branch = meta.default_branch;
-    const ref = (await this.request(
-      `git/ref/heads/${this.branch.split('/').map(encodeURIComponent).join('/')}`,
-    )) as { object: { sha: string } };
-    this.ref = ref.object.sha;
-    const tree = (await this.request(`git/trees/${this.ref}?recursive=1`)) as {
+    const commits = (await this.request(
+      'commits?per_page=1',
+      false,
+      'no-cache',
+    )) as { sha: string }[];
+    if (!/^[a-f0-9]{40,64}$/i.test(commits[0]?.sha || ''))
+      throw Error('仓库最新提交无效');
+    this.ref = commits[0].sha;
+    this.previous = cached;
+    const tree = (await this.request(
+      `git/trees/${this.ref}?recursive=1`,
+      false,
+      'default',
+    )) as {
       truncated?: boolean;
       tree: DocumentEntry[];
     };
@@ -67,9 +79,12 @@ export class Repository {
         x.type === 'blob' &&
         isDocumentPath(x.path, this.config.docsDir ?? 'docs'),
     );
+    return entries;
+  }
+  async modificationTimes(entries: DocumentEntry[]) {
     await loadModificationTimes(
       entries,
-      cached,
+      this.previous,
       this.ref,
       async (path) => {
         const params = new URLSearchParams({
@@ -77,23 +92,39 @@ export class Repository {
           sha: this.ref,
           per_page: '1',
         });
-        const commits = (await this.request(`commits?${params}`)) as {
+        const commits = (await this.request(
+          `commits?${params}`,
+          false,
+          'default',
+        )) as {
           commit?: { committer?: { date?: string } };
         }[];
         return Date.parse(commits[0]?.commit?.committer?.date || '');
       },
       () => !this.controller.signal.aborted,
     );
-    return entries;
+    this.previous = entries;
   }
   file(path: string): Promise<string>;
   file(path: string, raw: true): Promise<string>;
   file(path: string, raw: false): Promise<RepositoryImage>;
   async file(path: string, raw = true): Promise<string | RepositoryImage> {
     const endpoint = `contents/${path.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(this.ref)}`;
-    if (raw) return this.request(endpoint, true) as Promise<string>;
+    if (raw) return this.request(endpoint, true, 'default') as Promise<string>;
+    this.controller.signal.throwIfAborted();
+    return this.images.get(endpoint, () => this.readImage(path, endpoint));
+  }
+  private async readImage(
+    path: string,
+    endpoint: string,
+  ): Promise<RepositoryImage> {
+    this.controller.signal.throwIfAborted();
     // Raw responses preserve binary files, including images over the JSON API's 1 MB limit.
-    const content = (await this.request(endpoint, 'binary')) as ArrayBuffer;
+    const content = (await this.request(
+      endpoint,
+      'binary',
+      'default',
+    )) as ArrayBuffer;
     return {
       path,
       encoding: 'base64',

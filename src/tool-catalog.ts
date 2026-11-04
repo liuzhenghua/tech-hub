@@ -3,6 +3,9 @@ import { readUsage, type ToolId } from './tool-usage';
 export function mountToolCatalog(root: HTMLElement): () => void {
   const search = root.querySelector<HTMLInputElement>('#tool-search')!;
   const empty = root.querySelector<HTMLElement>('#tool-empty')!;
+  const categories = root.querySelector<HTMLElement>('#tool-categories')!;
+  const results = root.querySelector<HTMLElement>('#tool-results')!;
+  let category = '';
   const normalize = (value: string) =>
     value.normalize('NFKC').toLocaleLowerCase();
   const cards = Array.from(root.querySelectorAll<HTMLElement>('.tool')).map(
@@ -12,6 +15,31 @@ export function mountToolCatalog(root: HTMLElement): () => void {
     }),
   );
   const events = new AbortController();
+  const labels = [
+    ['', '全部'],
+    ['text', '文本与数据'],
+    ['security', '编码与安全'],
+    ['media', '图片与 PDF'],
+    ['time', '时间与日期'],
+  ];
+  const buttons = labels.map(([value, label]) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    const count = cards.filter(
+      ({ card }) => !value || card.dataset.category === value,
+    ).length;
+    button.textContent = `${label} ${count}`;
+    button.addEventListener(
+      'click',
+      () => {
+        category = value;
+        filter();
+      },
+      { signal: events.signal },
+    );
+    categories.append(button);
+    return { button, value };
+  });
   const grid = root.querySelector<HTMLElement>('.tools-grid')!;
   for (const { card } of cards) {
     const footer = document.createElement('span');
@@ -44,10 +72,15 @@ export function mountToolCatalog(root: HTMLElement): () => void {
     const terms = normalize(search.value).trim().split(/\s+/).filter(Boolean);
     let count = 0;
     for (const { card, text } of cards) {
-      card.hidden = !terms.every((term) => text.includes(term));
+      card.hidden =
+        (Boolean(category) && card.dataset.category !== category) ||
+        !terms.every((term) => text.includes(term));
       if (!card.hidden) count++;
     }
     empty.hidden = count > 0;
+    for (const item of buttons)
+      item.button.setAttribute('aria-pressed', String(item.value === category));
+    results.textContent = `显示 ${count} / ${cards.length} 个工具`;
   }
   search.addEventListener('input', filter, { signal: events.signal });
   filter();

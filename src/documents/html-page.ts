@@ -12,6 +12,8 @@ pre { padding: 18px; background: #f1f3ef; border-radius: 8px; overflow-x: auto; 
 code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
 :not(pre) > code { padding: 2px 5px; background: #f1f3ef; border-radius: 4px; }
 img, svg { max-width: 100%; height: auto; }
+.math-formula { font-size: 1.1em; }
+.math-formula:has(math[display="block"]) { display: block; overflow-x: auto; padding: 12px 0; }
 .document-image, .mermaid { display: block; }
 .mermaid { overflow-x: auto; text-align: center; }
 .mermaid svg { height: auto; }

@@ -497,6 +497,68 @@
   font-size: 12px;
   color: var(--muted);
 }
+.compression-help {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  font-size: 12px;
+}
+.compression-help summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  color: var(--accent);
+  list-style: none;
+  min-height: 32px;
+}
+.compression-help summary::-webkit-details-marker {
+  display: none;
+}
+.compression-help summary > span {
+  display: inline-grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 11px;
+}
+.compression-help summary::after {
+  content: '+';
+  margin-left: auto;
+  font-size: 16px;
+}
+.compression-help[open] summary::after {
+  content: '−';
+}
+.compression-help-content {
+  line-height: 1.85;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.compression-help-content h3 {
+  font-size: 12px;
+  color: var(--ink);
+  margin: 18px 0 5px;
+}
+.compression-help-content p {
+  margin: 8px 0;
+}
+.compression-help-content strong {
+  color: var(--ink);
+}
+.compression-help-content a {
+  display: inline-block;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  margin-top: 8px;
+}
+.compression-help-footnote {
+  border-left: 2px solid var(--line);
+  padding-left: 10px;
+}
 #saving-value {
   display: block;
   font-size: 32px;
