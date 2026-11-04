@@ -1,5 +1,5 @@
 import { mountComparison } from './comparison';
-import { copyImage } from './clipboard';
+import { copyImage } from '../image-shared/clipboard';
 import { recordUsage } from '../../tool-usage';
 import { mountImageInput } from '../image-shared/input';
 import {

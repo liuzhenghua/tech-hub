@@ -1,3 +1,4 @@
+import { copyImage } from '../image-shared/clipboard';
 import { recordUsage } from '../../tool-usage';
 import { mountImageInput } from '../image-shared/input';
 import {
@@ -21,6 +22,8 @@ const $ = <T extends HTMLElement = HTMLElement>(id: string) =>
 const events = new AbortController();
 const format = $<HTMLSelectElement>('output-format');
 const quality = $<HTMLInputElement>('crop-quality');
+const copy = $<HTMLButtonElement>('copy-crop');
+let copying = false;
 const download = $<HTMLButtonElement>('download-crop');
 let crop: Crop | null = null,
   ratio = 0,
@@ -40,6 +43,7 @@ function receive(asset: ImageAsset | null) {
   $('source-image').removeAttribute('src');
   if (!asset) {
     crop = null;
+    copy.disabled = true;
     return;
   }
   $<HTMLImageElement>('source-image').src = asset.url;
@@ -87,6 +91,7 @@ function update(next: Crop) {
   $('crop-output-size').textContent =
     `导出 ${selected.width} × ${selected.height} px`;
   preview(asset, selected);
+  copy.disabled = copying;
   download.disabled = false;
   download.textContent = '下载裁剪图片';
   $('status').textContent = '';
@@ -182,6 +187,38 @@ async function save() {
   }
 }
 download.addEventListener('click', () => void save(), {
+  signal: events.signal,
+});
+async function copyCrop() {
+  const asset = input.get();
+  if (!asset || !crop || copying) return;
+  const id = generation;
+  const selected = pixelCrop(crop, asset.bitmap);
+  copying = true;
+  copy.disabled = true;
+  copy.textContent = '正在复制…';
+  try {
+    await copyImage(
+      encodeImage(
+        asset.bitmap,
+        selected,
+        selected,
+        format.value as ImageFormat,
+        Number(quality.value) / 100,
+      ),
+    );
+    if (id === generation)
+      $('status').textContent = '已复制裁剪图片，可直接粘贴到聊天或文档中。';
+  } catch {
+    if (id === generation)
+      $('status').textContent = '复制失败，请允许剪贴板访问，或下载图片。';
+  } finally {
+    copying = false;
+    copy.textContent = '复制图片';
+    copy.disabled = !input.get() || events.signal.aborted;
+  }
+}
+copy.addEventListener('click', () => void copyCrop(), {
   signal: events.signal,
 });
 function dispose() {

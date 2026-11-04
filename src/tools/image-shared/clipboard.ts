@@ -1,6 +1,7 @@
-import { encodeImage } from '../image-shared/processing';
+import { encodeImage } from './processing';
 
 async function clipboardPng(blob: Blob): Promise<Blob> {
+  if (blob.type === 'image/png') return blob;
   const bitmap = await createImageBitmap(blob);
   try {
     const size = { width: bitmap.width, height: bitmap.height };
@@ -16,12 +17,14 @@ async function clipboardPng(blob: Blob): Promise<Blob> {
   }
 }
 
-export async function copyImage(blob: Blob): Promise<void> {
+export async function copyImage(blob: Blob | Promise<Blob>): Promise<void> {
   if (!navigator.clipboard?.write || typeof ClipboardItem === 'undefined')
     throw Error('当前浏览器不支持复制图片。');
   // Start the clipboard write during the click, before asynchronous decoding
   // consumes the transient user activation required by some browsers.
   await navigator.clipboard.write([
-    new ClipboardItem({ 'image/png': clipboardPng(blob) }),
+    new ClipboardItem({
+      'image/png': Promise.resolve(blob).then(clipboardPng),
+    }),
   ]);
 }
