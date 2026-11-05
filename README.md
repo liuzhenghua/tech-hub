@@ -79,7 +79,7 @@ node --env-file=.env.token.local tools/encrypt-token.mjs
 
 | 配置                     | 是否必填           | 默认值             | GitHub 配置位置 | 用途                                             |
 | ------------------------ | ------------------ | ------------------ | --------------- | ------------------------------------------------ |
-| `VITE_SITE_TITLE`        | 否                 | `文档与工具`       | Variables       | 页面品牌、浏览器标题和页脚名称                   |
+| `VITE_SITE_TITLE`        | 否                 | `文档与工具`       | Variables       | 页面品牌和页脚名称                               |
 | `VITE_GITHUB_REPOSITORY` | 否                 | `liuzhenghua/tech` | Variables       | 文档源仓库，格式为 `owner/repo`                  |
 | `VITE_DOCS_DIR`          | 否                 | `docs`             | Variables       | 仓库内文档目录，支持多层路径；`/` 表示仓库根目录 |
 | `VITE_GITHUB_TOKEN_BOX`  | 访问私有文档时必填 | 无                 | Secrets         | 加密后的 Token；未配置时只能使用公开工具         |

@@ -1,3 +1,4 @@
+import { setPageMetadata } from './page-metadata';
 import { config } from './config';
 import { parseRoute } from './routes';
 import { mountSiteHeader } from './components/site-header';
@@ -69,7 +70,7 @@ async function navigate() {
   disposePage?.();
   disposePage = undefined;
   header.setPage(page);
-  document.title = `${page === 'docs' ? '文档' : '工具'} · ${config.title}`;
+  setPageMetadata(page === 'docs' ? '文档' : '工具', page);
   loading();
   try {
     const mount = await (page === 'docs' ? mountDocuments() : mountTools());

@@ -1,3 +1,4 @@
+import { setPageMetadata } from '../../page-metadata';
 import { recordUsage } from '../../tool-usage';
 export interface WorkspaceTool {
   title: string;
@@ -38,10 +39,10 @@ export function mountToolWorkspace(
     for (const button of root.querySelectorAll<HTMLElement>('[data-mode]'))
       button.setAttribute('aria-pressed', String(button.dataset.mode === mode));
     document.body.dataset.tool = mode;
-    document.title =
-      tools[mode].title +
-      ' · ' +
-      (import.meta.env.VITE_SITE_TITLE || '文档与工具');
+    setPageMetadata(
+      tools[mode].title,
+      mode === 'clipboard' ? 'clipboard' : 'tools',
+    );
   }
   for (const button of root.querySelectorAll<HTMLElement>('[data-mode]'))
     button.addEventListener(

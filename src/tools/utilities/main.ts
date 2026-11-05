@@ -53,7 +53,7 @@ function navigate() {
   active = mode;
   dispose = tools[mode].mount(root);
   restoreDraft(mode);
-  document.title = `${tools[mode].title} · ${import.meta.env.VITE_SITE_TITLE || '文档与工具'}`;
+  document.title = tools[mode].title;
   for (const button of document.querySelectorAll<HTMLElement>('[data-mode]'))
     button.setAttribute('aria-pressed', String(button.dataset.mode === mode));
 }

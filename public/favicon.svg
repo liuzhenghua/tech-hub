@@ -1,12 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#2d654a" />
-  <g
-    fill="none"
-    stroke="#f6f5f1"
-    stroke-width="4"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  >
-    <path d="M23 21 12 32l11 11m18-22 11 11-11 11M36 17l-8 30" />
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#2d654a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="3" width="7" height="7" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+      <path d="M14 17.5h7m-3.5-3.5v7" />
+    </svg>
