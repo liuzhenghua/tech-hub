@@ -16,6 +16,7 @@ export async function loadModificationTimes(
   active: () => boolean,
 ) {
   const previous = new Map(cached.map((entry) => [entry.path, entry]));
+  const results = new Map<DocumentEntry, number>();
   let cursor = 0;
   async function load(entry: DocumentEntry) {
     const saved = previous.get(entry.path);
@@ -25,15 +26,13 @@ export async function loadModificationTimes(
       saved.modifiedRef === ref &&
       Number.isFinite(saved.modifiedAt)
     ) {
-      entry.modifiedAt = saved.modifiedAt;
-      entry.modifiedRef = ref;
+      results.set(entry, saved.modifiedAt!);
       return;
     }
     try {
       const time = await read(entry.path);
       if (active() && Number.isFinite(time)) {
-        entry.modifiedAt = time;
-        entry.modifiedRef = ref;
+        results.set(entry, time);
       }
     } catch {
       // An unavailable timestamp must not prevent reading the document library.
@@ -46,4 +45,15 @@ export async function loadModificationTimes(
     Array.from({ length: Math.min(3, entries.length) }, worker),
   );
   if (!active()) throw new DOMException('修改时间加载已取消', 'AbortError');
+  // Publish together so filtering and searching cannot expose partial ordering.
+  for (const entry of entries) {
+    const time = results.get(entry);
+    if (time === undefined) {
+      delete entry.modifiedAt;
+      delete entry.modifiedRef;
+    } else {
+      entry.modifiedAt = time;
+      entry.modifiedRef = ref;
+    }
+  }
 }

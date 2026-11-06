@@ -185,7 +185,8 @@ export function createCatalog(
         ? `${items.length} / ${groups.length} 篇主文档`
         : `${groups.length} 篇主文档`;
     if (indexing) elements.total.textContent += ' · 更新中';
-    if (groups.some((group) => !Number.isFinite(group.entry.modifiedAt)))
+    if (indexing) elements.total.textContent += ' · 正在更新排序时间';
+    else if (groups.some((group) => !Number.isFinite(group.entry.modifiedAt)))
       elements.total.textContent += ' · 部分修改时间未获取';
     for (const group of items) elements.files.append(cardFor(group, query));
     if (!items.length && indexing)

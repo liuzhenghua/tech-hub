@@ -115,3 +115,36 @@ test('unlock listing does not wait for per-document modification times', async (
   assert.equal(calls[2].cache, 'default');
   assert.equal(entries[0].modifiedAt, Date.parse('2026-11-04T00:00:00Z'));
 });
+
+test('listing preserves cached sorting times even when blobs change, but refreshes the new snapshot', async (t) => {
+  const head = 'b'.repeat(40);
+  let queries = 0;
+  t.mock.method(globalThis, 'fetch', async (url) => {
+    if (String(url).includes('commits?per_page=1'))
+      return Response.json([{ sha: head }]);
+    if (String(url).includes('git/trees/'))
+      return Response.json({
+        tree: [
+          { path: 'docs/a.md', sha: 'new', type: 'blob' },
+          { path: 'docs/b.md', sha: 'same', type: 'blob' },
+        ],
+      });
+    queries++;
+    return Response.json([
+      { commit: { committer: { date: '2026-11-06T00:00:00Z' } } },
+    ]);
+  });
+  const repository = new Repository(config, 'token');
+  const entries = await repository.list([
+    { path: 'docs/a.md', sha: 'old', modifiedAt: 100, modifiedRef: 'old' },
+    { path: 'docs/b.md', sha: 'same', modifiedAt: 200, modifiedRef: 'old' },
+  ]);
+  assert.deepEqual(
+    entries.map((x) => x.modifiedAt),
+    [100, 200],
+  );
+  assert.equal(queries, 0);
+  await repository.modificationTimes(entries);
+  assert.equal(queries, 2);
+  assert.ok(entries.every((x) => x.modifiedRef === head));
+});

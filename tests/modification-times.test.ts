@@ -74,3 +74,40 @@ test('cancelled queries cannot publish stale timestamps', async () => {
   );
   assert.equal((entries[0] as DocumentEntry).modifiedAt, undefined);
 });
+
+test('refresh preserves the previous order until all times settle and clears failed stale times', async () => {
+  const entries: DocumentEntry[] = [
+    { path: 'a', sha: 'new', modifiedAt: 100, modifiedRef: 'old' },
+    { path: 'b', sha: 'same', modifiedAt: 200, modifiedRef: 'old' },
+  ];
+  let finish!: () => void;
+  const pending = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+  const loading = loadModificationTimes(
+    entries,
+    entries,
+    'head',
+    async (path) => {
+      if (path === 'a') return 300;
+      await pending;
+      throw Error('unavailable');
+    },
+    () => true,
+  );
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(
+    [...entries].sort(compareModificationTimes).map((x) => x.path),
+    ['b', 'a'],
+  );
+  assert.equal(entries[0].modifiedAt, 100);
+  finish();
+  await loading;
+  assert.deepEqual(
+    [...entries].sort(compareModificationTimes).map((x) => x.path),
+    ['a', 'b'],
+  );
+  assert.equal(entries[0].modifiedRef, 'head');
+  assert.equal(entries[1].modifiedAt, undefined);
+  assert.equal(entries[1].modifiedRef, undefined);
+});

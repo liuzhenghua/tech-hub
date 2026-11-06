@@ -79,6 +79,14 @@ export class Repository {
         x.type === 'blob' &&
         isDocumentPath(x.path, this.config.docsDir ?? 'docs'),
     );
+    const previous = new Map(cached.map((entry) => [entry.path, entry]));
+    for (const entry of entries) {
+      const saved = previous.get(entry.path);
+      if (!Number.isFinite(saved?.modifiedAt)) continue;
+      // Keep the last known order until this snapshot's timestamps are ready.
+      entry.modifiedAt = saved!.modifiedAt;
+      entry.modifiedRef = saved!.modifiedRef;
+    }
     return entries;
   }
   async modificationTimes(entries: DocumentEntry[]) {
