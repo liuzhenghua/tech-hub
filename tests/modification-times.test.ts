@@ -20,7 +20,7 @@ test('documents sort newest first, break ties by path and place missing times la
   );
 });
 
-test('modification queries use at most three workers, reuse only the same snapshot and tolerate failures', async () => {
+test('modification queries use at most three workers, reuse unchanged files across snapshots and tolerate failures', async () => {
   const entries: DocumentEntry[] = Array.from({ length: 7 }, (_, i) => ({
     path: String(i),
     sha: 'blob',
@@ -49,9 +49,9 @@ test('modification queries use at most three workers, reuse only the same snapsh
   );
   assert.equal(peak, 3);
   assert.ok(!calls.includes('0'));
-  assert.ok(calls.includes('1'));
+  assert.ok(!calls.includes('1'));
   assert.equal(entries[0].modifiedAt, 100);
-  assert.equal(entries[1].modifiedAt, 200);
+  assert.equal(entries[1].modifiedAt, 50);
   assert.equal(entries[2].modifiedAt, undefined);
   assert.equal(entries[3].modifiedAt, undefined);
 });
@@ -75,10 +75,38 @@ test('cancelled queries cannot publish stale timestamps', async () => {
   assert.equal((entries[0] as DocumentEntry).modifiedAt, undefined);
 });
 
+test('new paths, changed hashes and missing valid times still require queries', async () => {
+  const entries: DocumentEntry[] = [
+    { path: 'new', sha: 'same' },
+    { path: 'changed', sha: 'new' },
+    { path: 'missing', sha: 'same' },
+    { path: 'invalid', sha: 'same' },
+  ];
+  const cached = [
+    { path: 'other', sha: 'same', modifiedAt: 100 },
+    { path: 'changed', sha: 'old', modifiedAt: 100 },
+    { path: 'missing', sha: 'same' },
+    { path: 'invalid', sha: 'same', modifiedAt: NaN },
+  ];
+  const calls: string[] = [];
+  await loadModificationTimes(
+    entries,
+    cached,
+    'head',
+    async (path) => {
+      calls.push(path);
+      return 200;
+    },
+    () => true,
+  );
+  assert.deepEqual(calls.sort(), entries.map((entry) => entry.path).sort());
+  assert.ok(entries.every((entry) => entry.modifiedAt === 200));
+});
+
 test('refresh preserves the previous order until all times settle and clears failed stale times', async () => {
   const entries: DocumentEntry[] = [
     { path: 'a', sha: 'new', modifiedAt: 100, modifiedRef: 'old' },
-    { path: 'b', sha: 'same', modifiedAt: 200, modifiedRef: 'old' },
+    { path: 'b', sha: 'new-b', modifiedAt: 200, modifiedRef: 'old' },
   ];
   let finish!: () => void;
   const pending = new Promise<void>((resolve) => {
@@ -86,7 +114,7 @@ test('refresh preserves the previous order until all times settle and clears fai
   });
   const loading = loadModificationTimes(
     entries,
-    entries,
+    entries.map((entry) => ({ ...entry, sha: 'old' })),
     'head',
     async (path) => {
       if (path === 'a') return 300;

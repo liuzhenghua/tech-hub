@@ -116,7 +116,7 @@ test('unlock listing does not wait for per-document modification times', async (
   assert.equal(entries[0].modifiedAt, Date.parse('2026-11-04T00:00:00Z'));
 });
 
-test('listing preserves cached sorting times even when blobs change, but refreshes the new snapshot', async (t) => {
+test('listing preserves cached sorting times and only queries changed files in a new snapshot', async (t) => {
   const head = 'b'.repeat(40);
   let queries = 0;
   t.mock.method(globalThis, 'fetch', async (url) => {
@@ -145,6 +145,10 @@ test('listing preserves cached sorting times even when blobs change, but refresh
   );
   assert.equal(queries, 0);
   await repository.modificationTimes(entries);
-  assert.equal(queries, 2);
+  assert.equal(queries, 1);
+  assert.deepEqual(
+    entries.map((entry) => entry.modifiedAt),
+    [Date.parse('2026-11-06T00:00:00Z'), 200],
+  );
   assert.ok(entries.every((x) => x.modifiedRef === head));
 });

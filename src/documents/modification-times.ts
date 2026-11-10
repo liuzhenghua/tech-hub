@@ -7,7 +7,7 @@ export function compareModificationTimes(a: DocumentEntry, b: DocumentEntry) {
   return a.path < b.path ? -1 : Number(a.path > b.path);
 }
 
-/** Commit times belong to a repository snapshot, not just a blob (which can be reverted). */
+/** Reuse known times for unchanged files, even across repository snapshots. */
 export async function loadModificationTimes(
   entries: DocumentEntry[],
   cached: readonly DocumentEntry[],
@@ -20,12 +20,7 @@ export async function loadModificationTimes(
   let cursor = 0;
   async function load(entry: DocumentEntry) {
     const saved = previous.get(entry.path);
-    if (
-      saved &&
-      saved.sha === entry.sha &&
-      saved.modifiedRef === ref &&
-      Number.isFinite(saved.modifiedAt)
-    ) {
+    if (saved && saved.sha === entry.sha && Number.isFinite(saved.modifiedAt)) {
       results.set(entry, saved.modifiedAt!);
       return;
     }
