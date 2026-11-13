@@ -856,9 +856,10 @@ body > header {
 :is(#document, .markdown-body) pre {
   position: relative;
   padding: 16px;
-  padding-right: 48px;
+  padding-right: 84px;
 }
-.copy-code {
+.copy-code,
+.wrap-code {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -874,18 +875,31 @@ body > header {
   opacity: 0;
   transition: opacity 0.15s;
 }
-:is(#document, .markdown-body) pre:hover .copy-code,
-:is(#document, .markdown-body) pre:focus-within .copy-code {
+:is(#document, .markdown-body) pre:hover :is(.copy-code, .wrap-code),
+:is(#document, .markdown-body) pre:focus-within .copy-code,
+.wrap-code {
   opacity: 1;
 }
 @media (hover: none) {
-  .copy-code {
+  .copy-code,
+  .wrap-code {
     opacity: 1;
   }
 }
-.copy-code:hover {
+.copy-code:hover,
+.wrap-code:hover,
+.wrap-code[aria-pressed='true'] {
   color: var(--accent);
   border-color: var(--accent);
+}
+
+.wrap-code {
+  right: 44px;
+}
+:is(#document, .markdown-body) pre.code-wrap,
+:is(#document, .markdown-body) pre.code-wrap > code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .diagram-frame {

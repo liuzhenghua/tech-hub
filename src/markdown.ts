@@ -45,6 +45,7 @@ export function enhanceCodeBlocks(
     // Unknown languages remain readable plain text; avoid expensive auto-detection.
     if (language && hljs.getLanguage(language)) hljs.highlightElement(code);
     const button = document.createElement('button');
+    button.type = 'button';
     button.className = 'copy-code';
     const copyIcon =
       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>';
@@ -60,7 +61,19 @@ export function enhanceCodeBlocks(
         status('浏览器未允许复制，请选中代码后手动复制。');
       }
     };
-    pre.append(button);
+    const wrapButton = document.createElement('button');
+    wrapButton.type = 'button';
+    wrapButton.className = 'wrap-code';
+    wrapButton.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 5h18M3 10h13a4 4 0 0 1 0 8h-4m3-3-3 3 3 3M3 15h4"/></svg>';
+    wrapButton.title = '自动换行';
+    wrapButton.setAttribute('aria-label', '自动换行');
+    wrapButton.setAttribute('aria-pressed', 'false');
+    wrapButton.onclick = () => {
+      const wrapped = pre.classList.toggle('code-wrap');
+      wrapButton.setAttribute('aria-pressed', String(wrapped));
+    };
+    pre.append(wrapButton, button);
   }
 }
 export async function renderMarkdown(

@@ -338,7 +338,7 @@
 }
 .markdown-body pre {
   position: relative;
-  padding: 16px 48px 16px 16px;
+  padding: 16px 84px 16px 16px;
   border-radius: 7px;
   background: #f1f3ef;
   overflow: auto;
@@ -349,8 +349,8 @@
   background: transparent;
   overflow: visible;
 }
-.markdown-body pre:hover .copy-code,
-.markdown-body pre:focus-within .copy-code {
+.markdown-body pre:hover :is(.copy-code, .wrap-code),
+.markdown-body pre:focus-within :is(.copy-code, .wrap-code) {
   opacity: 1;
 }
 .markdown-body table {
