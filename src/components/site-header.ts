@@ -22,7 +22,7 @@ export function mountSiteHeader(root: HTMLElement) {
   return {
     lockButton,
     setPage(page: 'tools' | 'docs') {
-      title.textContent = page === 'docs' ? '私有文档库' : '常用工具';
+      title.textContent = page === 'docs' ? '文档' : '常用工具';
       toolsIcon.toggleAttribute('hidden', page !== 'tools');
       docsIcon.toggleAttribute('hidden', page !== 'docs');
       for (const [link, active] of [

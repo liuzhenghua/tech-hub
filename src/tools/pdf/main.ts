@@ -111,6 +111,38 @@ bindDrop('pdf-drop', (files) => {
   else message('请选择 PDF 文件');
 });
 bindDrop('image-drop', addImages);
+document.addEventListener(
+  'paste',
+  (event) => {
+    if (
+      event.target instanceof Element &&
+      event.target.closest(
+        'input, textarea, [contenteditable]:not([contenteditable="false"])',
+      )
+    )
+      return;
+    const files = Array.from(event.clipboardData?.files || []);
+    if (mode.value === 'split') {
+      const pdf = files.find(
+        (file) =>
+          file.type === 'application/pdf' ||
+          file.name.toLowerCase().endsWith('.pdf'),
+      );
+      if (!pdf) return;
+      event.preventDefault();
+      void loadPdf(pdf);
+      return;
+    }
+    const supported = files.filter((file) =>
+      ['image/jpeg', 'image/png', 'image/webp'].includes(file.type),
+    );
+    if (!supported.length) return;
+    event.preventDefault();
+    addImages(supported);
+    message(`已粘贴 ${supported.length} 张图片。`);
+  },
+  { signal: events.signal },
+);
 function addImages(files: File[]) {
   for (const file of files)
     if (['image/jpeg', 'image/png', 'image/webp'].includes(file.type))
