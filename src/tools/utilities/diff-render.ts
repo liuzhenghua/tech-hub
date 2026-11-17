@@ -1,4 +1,5 @@
 import type { DiffLine } from './diff';
+import { alignChangedLines } from './diff-alignment';
 import { inlineDiff, type TextPart } from './inline-diff';
 function cell(
   line: DiffLine | undefined,
@@ -50,22 +51,19 @@ function changedRows(
   while (next < lines.length && lines[next].kind !== 'same') {
     (lines[next].kind === 'remove' ? removed : added).push(lines[next++]);
   }
+  const pairs = alignChangedLines(removed, added);
   if (unified) {
-    const parts = removed.map((line, i) =>
-      added[i] ? inlineDiff(line.text, added[i].text) : undefined,
-    );
-    return {
-      rows: [
-        ...removed.map((line, i) => cell(line, 'left', parts[i]?.[0])),
-        ...added.map((line, i) => cell(line, 'right', parts[i]?.[1])),
-      ],
-      next,
-    };
+    const leftCells: HTMLElement[] = [],
+      rightCells: HTMLElement[] = [];
+    for (const [left, right] of pairs) {
+      const parts =
+        left && right ? inlineDiff(left.text, right.text) : undefined;
+      if (left) leftCells.push(cell(left, 'left', parts?.[0]));
+      if (right) rightCells.push(cell(right, 'right', parts?.[1]));
+    }
+    return { rows: [...leftCells, ...rightCells], next };
   }
-  const rows = Array.from(
-    { length: Math.max(removed.length, added.length) },
-    (_, i) => row(removed[i], added[i]),
-  );
+  const rows = pairs.map(([left, right]) => row(left, right));
   return { rows, next };
 }
 export function renderDiff(
