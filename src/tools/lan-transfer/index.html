@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>内网文件传输</title>
+    <link rel="stylesheet" href="../../style.css" />
+    <link rel="stylesheet" href="../../tool.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body class="tool-page lan-page">
+    <main class="lan-tool">
+      <header class="tool-header">
+        <a class="back-button" href="../../#/tools">← 全部工具</a>
+        <h1>内网文件传输</h1>
+        <span>点对点传输 · 文件不上传服务器</span>
+      </header>
+      <div class="bottom-toolbar">
+        <span id="connection-status" role="status">尚未连接</span>
+        <div class="actions">
+          <button id="reset" class="lan-secondary">断开 / 重新开始</button
+          ><button id="configure">连接设备</button>
+        </div>
+      </div>
+      <section class="editor lan-workspace" aria-labelledby="transfer-title">
+        <div class="editor-head">
+          <h2 id="transfer-title">发送与接收</h2>
+          <span>单个文件最大 256 MB</span>
+        </div>
+        <div class="lan-transfer-body">
+          <p>每次一个文件，最大 256 MB。传输期间保持双方页面打开、设备唤醒。</p>
+          <input id="file" type="file" hidden />
+          <div
+            id="drop-zone"
+            class="lan-drop-zone"
+            tabindex="0"
+            aria-label="文件发送区，可拖入文件或粘贴剪贴板文件"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 16V3m-5 5 5-5 5 5M4 15v5h16v-5" />
+            </svg>
+            <h3>把文件拖到这里</h3>
+            <p>也可以按 Command + V / Ctrl + V 粘贴文件或截图</p>
+            <button id="choose-file">选择文件</button>
+          </div>
+          <div class="lan-filebar">
+            <span id="selected-file" role="status">尚未选择文件</span
+            ><button id="clear-file" class="lan-secondary" disabled>
+              移除
+            </button>
+          </div>
+          <div class="lan-actions">
+            <button id="send" class="primary" disabled>发送文件</button>
+          </div>
+          <div id="incoming" hidden>
+            <p id="request"></p>
+            <div class="lan-actions">
+              <button id="accept">接收文件</button
+              ><button id="reject">拒绝</button>
+            </div>
+          </div>
+          <progress
+            id="progress"
+            max="1"
+            value="0"
+            aria-label="文件传输进度"
+          ></progress
+          ><span id="progress-label">0%</span>
+          <p id="transfer-status" role="status">连接后选择文件发送。</p>
+          <div id="download-area" hidden>
+            <a id="download">保存接收到的文件</a
+            ><button id="release">清除已接收文件</button>
+            <p>保存后可清除以释放内存；下次接收完成会替换这里的文件。</p>
+          </div>
+        </div>
+      </section>
+      <details class="verification-panel">
+        <summary>使用条件与限制</summary>
+        <p>
+          双方使用 HTTPS 网站或 localhost，推荐新版 Chrome /
+          Edge。配对需要联网访问免费的 PeerJS Cloud；文件通过 WebRTC
+          加密直传，不上传配对服务器。请保持双方页面打开、设备唤醒。
+        </p>
+        <p>
+          同一内网也可能受到访客 Wi-Fi、AP
+          隔离、防火墙及浏览器本地网络权限限制。本工具不使用 STUN / TURN
+          中转，无法直连时会提示失败。
+        </p>
+        <p>
+          配对码为一次性临时码，5
+          分钟未配对会失效。只告诉可信对象，并确认对方正在连接后再允许配对。刷新会清除连接和未保存文件；暂不支持文件夹、断点续传或自动发现。
+        </p>
+      </details>
+    </main>
+    <dialog id="connection-dialog" aria-labelledby="connection-title">
+      <div class="lan-heading">
+        <h2 id="connection-title">连接设备</h2>
+        <button
+          id="close-dialog"
+          class="lan-secondary"
+          aria-label="关闭连接设置"
+        >
+          关闭
+        </button>
+      </div>
+      <p>
+        一方生成配对码，另一方输入。两台电脑只需打开网站，无需安装或启动程序。
+      </p>
+      <section class="lan-pair-section" aria-labelledby="create-pair-title">
+        <h3 id="create-pair-title">让对方连接我</h3>
+        <div class="lan-actions">
+          <button id="generate" class="primary">生成配对码</button>
+        </div>
+        <div class="lan-code-row">
+          <label for="my-code">我的配对码</label
+          ><input id="my-code" readonly placeholder="未生成" /><button
+            id="copy-code"
+            class="lan-secondary"
+            disabled
+          >
+            复制
+          </button>
+        </div>
+      </section>
+      <section class="lan-pair-section" aria-labelledby="join-pair-title">
+        <h3 id="join-pair-title">连接对方</h3>
+        <label for="code">对方的 6 位数字配对码</label>
+        <div class="lan-actions">
+          <input
+            id="code"
+            placeholder="例如 728639"
+            maxlength="11"
+            inputmode="numeric"
+            autocomplete="off"
+          /><button id="connect">连接</button>
+        </div>
+      </section>
+      <div id="pair-request" hidden>
+        <p>有人输入了你的配对码。确认对方正在连接，再允许配对。</p>
+        <div class="lan-actions">
+          <button id="allow-pair" class="primary">允许配对</button
+          ><button id="deny-pair" class="lan-secondary">拒绝</button>
+        </div>
+      </div>
+      <p id="dialog-status" role="status">尚未连接</p>
+      <p class="lan-service-note">
+        配对服务：PeerJS
+        Cloud（免费）。它仅帮助交换连接信息；网络不可达时无法配对。重新生成配对码请先点击主界面的“断开
+        / 重新开始”。
+      </p>
+    </dialog>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

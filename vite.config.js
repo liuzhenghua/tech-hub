@@ -26,6 +26,7 @@ export default defineConfig({
             'utilities',
             'image-crop',
             'image-compress',
+            'lan-transfer',
           ].map((name) => [
             name,
             fileURLToPath(

@@ -15,6 +15,7 @@ export const toolIds = [
   'timestamp',
   'diff',
   'regex',
+  'lan-transfer',
 ] as const;
 export type ToolId = (typeof toolIds)[number];
 export function readUsage(): Partial<Record<ToolId, number>> {
