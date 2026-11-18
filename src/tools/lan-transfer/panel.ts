@@ -1,4 +1,5 @@
 import { PairSession } from './session';
+import { createCloudPeer } from './cloud';
 import { peerError, pairingCode } from './pairing';
 import { Transfer } from './transfer';
 import { mountFileInput } from './file-input';
@@ -109,28 +110,35 @@ export function mountTransfer() {
       text('connection-status', peerError(error));
       return;
     }
-    const current = new PairSession({
-      code: (value) => {
-        $<HTMLInputElement>('my-code').value = value;
-        button('copy-code').disabled = false;
+    text('connection-diagnostic', '正在连接配对服务…');
+    const current = new PairSession(
+      {
+        diagnostic: (value) => {
+          if (session === current) text('connection-diagnostic', value);
+        },
+        code: (value) => {
+          $<HTMLInputElement>('my-code').value = value;
+          button('copy-code').disabled = false;
+        },
+        request: () => {
+          $('pair-request').hidden = false;
+          if (!dialog.open) dialog.showModal();
+        },
+        ready: (channel) => {
+          if (session === current) attach(current, channel);
+        },
+        status: (value) => {
+          if (session === current) text('connection-status', value);
+        },
+        failed: (value) => {
+          if (session === current) {
+            reset();
+            text('connection-status', value);
+          }
+        },
       },
-      request: () => {
-        $('pair-request').hidden = false;
-        if (!dialog.open) dialog.showModal();
-      },
-      ready: (channel) => {
-        if (session === current) attach(current, channel);
-      },
-      status: (value) => {
-        if (session === current) text('connection-status', value);
-      },
-      failed: (value) => {
-        if (session === current) {
-          reset();
-          text('connection-status', value);
-        }
-      },
-    });
+      createCloudPeer,
+    );
     session = current;
     update();
     text('connection-status', '正在连接 PeerJS Cloud…');
@@ -159,6 +167,7 @@ export function mountTransfer() {
       () => {
         try {
           session?.respond(action === 'allow-pair');
+          $('pair-request').hidden = true;
         } catch {
           reset();
           text('connection-status', '配对失败，请重新开始。');

@@ -84,8 +84,8 @@
         </p>
         <p>
           同一内网也可能受到访客 Wi-Fi、AP
-          隔离、防火墙及浏览器本地网络权限限制。本工具不使用 STUN / TURN
-          中转，无法直连时会提示失败。
+          隔离、防火墙及浏览器本地网络权限限制。使用 STUN 发现直连地址，不配置
+          TURN 中继。开启 VPN 时请允许局域网直连；无法直连时会提示失败。
         </p>
         <p>
           配对码为一次性临时码，5
@@ -137,13 +137,18 @@
         </div>
       </section>
       <div id="pair-request" hidden>
-        <p>有人输入了你的配对码。确认对方正在连接，再允许配对。</p>
+        <p>
+          已收到配对请求。确认是你要连接的人，再允许配对；网络检测和文件通道建立可能仍在进行。
+        </p>
         <div class="lan-actions">
           <button id="allow-pair" class="primary">允许配对</button
           ><button id="deny-pair" class="lan-secondary">拒绝</button>
         </div>
       </div>
       <p id="dialog-status" role="status">尚未连接</p>
+      <p id="connection-diagnostic" class="lan-service-note" role="status">
+        尚未检测网络连接。
+      </p>
       <p class="lan-service-note">
         配对服务：PeerJS
         Cloud（免费）。它仅帮助交换连接信息；网络不可达时无法配对。重新生成配对码请先点击主界面的“断开

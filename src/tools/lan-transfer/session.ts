@@ -1,5 +1,6 @@
-import { Peer, SerializationType, type DataConnection } from 'peerjs';
+import type { Peer, DataConnection } from 'peerjs';
 import { generateCode, pairingCode, peerError } from './pairing';
+import { DIRECT_TIMEOUT, iceSummary } from './ice';
 
 const PREFIX = 'tech-hub-lan-v1-';
 type SessionView = {
@@ -8,6 +9,7 @@ type SessionView = {
   ready: (channel: RTCDataChannel) => void;
   status: (value: string) => void;
   failed: (value: string) => void;
+  diagnostic: (value: string) => void;
 };
 function register(client: Peer, signal: AbortSignal) {
   return new Promise<void>((resolve, reject) => {
@@ -39,7 +41,11 @@ export class PairSession {
   private timer?: ReturnType<typeof setTimeout>;
   private paired = false;
   private waitingApproval = false;
-  constructor(private view: SessionView) {}
+  private approved = false;
+  constructor(
+    private view: SessionView,
+    private createPeer: (id: string) => Peer,
+  ) {}
   private arm(timeout: number, message: string) {
     clearTimeout(this.timer);
     this.timer = setTimeout(() => this.fail(message), timeout);
@@ -49,11 +55,7 @@ export class PairSession {
   }
   private async online(id: string) {
     this.events.signal.throwIfAborted();
-    const client = new Peer(id, {
-      debug: 0,
-      secure: true,
-      config: { iceServers: [] },
-    });
+    const client = this.createPeer(id);
     this.client = client;
     await register(client, this.events.signal);
     this.events.signal.throwIfAborted();
@@ -63,6 +65,7 @@ export class PairSession {
     client.on('disconnected', () => {
       if (!this.paired) this.fail('配对服务已断开，请重新开始。');
     });
+    this.view.diagnostic('已连接 PeerJS Cloud，配对服务可用。');
     return client;
   }
   async host() {
@@ -90,9 +93,9 @@ export class PairSession {
     const client = await this.online(`${PREFIX}client-${crypto.randomUUID()}`);
     this.events.signal.throwIfAborted();
     client.on('connection', (connection) => connection.close());
-    this.view.status('正在连接对方，连接后等待对方确认…');
+    this.view.status('正在向对方发送配对请求，同时检测直连路径…');
     const connection = client.connect(PREFIX + code, {
-      serialization: SerializationType.None,
+      serialization: 'raw',
       reliable: true,
     });
     this.attach(connection, false);
@@ -103,39 +106,58 @@ export class PairSession {
       return;
     }
     this.connection = connection;
-    this.arm(
-      30_000,
-      '建立点对点连接超时，请检查内网权限、防火墙和网络隔离设置。',
-    );
-    connection.on('error', (error) => this.fail(peerError(error)));
+    this.arm(30_000, DIRECT_TIMEOUT);
+    connection.on('error', (error) => {
+      this.fail(
+        error.type === 'negotiation-failed' ? DIRECT_TIMEOUT : peerError(error),
+      );
+    });
     connection.on('close', () =>
       this.fail('对方已断开或拒绝配对，请重新开始。'),
     );
-    connection.on('open', () => {
-      this.arm(120_000, '等待配对确认超时，请重新开始。');
-      if (host) {
-        this.waitingApproval = true;
-        this.view.request();
-      }
+    connection.on('iceStateChanged', (state) => {
+      this.view.diagnostic(iceSummary(state));
+      if (state === 'failed') this.fail(DIRECT_TIMEOUT);
     });
+    if (host) {
+      // PeerJS emits `connection` when signaling arrives, before ICE succeeds.
+      this.waitingApproval = true;
+      this.view.status('已收到对方请求，请确认配对；文件通道仍在建立中。');
+      this.view.request();
+    }
+    connection.on('open', () => this.opened(host));
     if (!host)
       connection.on('data', (data) => {
         if (data === 'tech-hub:paired:v1' && !this.paired) this.ready();
       });
   }
+  private opened(host: boolean) {
+    if (host && this.approved) {
+      this.confirm();
+      return;
+    }
+    this.arm(120_000, '文件通道已连通，但等待配对确认超时，请重新开始。');
+    this.view.status('文件通道已连通，等待生成配对码的一方确认。');
+  }
   respond(accept: boolean) {
-    if (!this.waitingApproval || !this.connection?.open) return;
+    if (!this.waitingApproval || !this.connection) return;
     this.waitingApproval = false;
     if (!accept) {
       this.fail('已拒绝配对，请重新生成配对码。');
       return;
     }
-    this.connection.dataChannel.send('tech-hub:paired:v1');
+    this.approved = true;
+    this.view.status('已允许配对，正在建立文件通道…');
+    if (this.connection.open) this.confirm();
+  }
+  private confirm() {
+    this.connection!.dataChannel.send('tech-hub:paired:v1');
     this.ready();
   }
   private ready() {
     clearTimeout(this.timer);
     this.paired = true;
+    this.view.diagnostic('配对已确认，点对点文件通道已连通。');
     this.view.ready(this.connection!.dataChannel);
     // The one-time code stops accepting other peers after pairing.
     this.client?.disconnect();
