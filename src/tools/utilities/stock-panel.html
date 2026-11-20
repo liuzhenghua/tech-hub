@@ -11,7 +11,12 @@
         step="any"
         placeholder="例如 22.75"
       />
-      <label for="stock-shares">持仓股数（股）</label>
+      <input id="stock-source" type="hidden" value="shares" />
+      <select id="stock-mode" aria-label="买入数量输入方式">
+        <option value="shares">按股数</option>
+        <option value="amount">按总额</option>
+      </select>
+      <label id="stock-shares-label" for="stock-shares">买入股数（股）</label>
       <input
         id="stock-shares"
         type="number"
@@ -21,18 +26,19 @@
         max="9007199254740991"
         placeholder="例如 500"
       />
-      <label for="stock-amount">买入总额（元，可选）</label>
+      <label id="stock-amount-label" for="stock-amount" hidden
+        >买入总额（元）</label
+      >
       <input
         id="stock-amount"
+        hidden
         type="number"
         inputmode="decimal"
         min="0"
         step="any"
         placeholder="例如 10000"
       />
-      <p class="utility-hint">
-        填入买入单价和股数即可算出买入总额。已知总额时也可直接填写，计算时以填写的总额为准。
-      </p>
+      <p id="stock-conversion" class="utility-hint" hidden></p>
       <label for="stock-current">当前价（元 / 股）</label>
       <input
         id="stock-current"
@@ -57,7 +63,7 @@
       <span class="utility-meta" id="stock-value-label">当前市值</span>
       <output id="stock-value" aria-labelledby="stock-value-label">—</output>
       <p class="utility-hint">
-        未填股数时按投入金额全部买入估算。结果未计交易费用。
+        按总额换算时允许出现估算股数。结果未计交易费用。
       </p>
     </div>
   </section>
