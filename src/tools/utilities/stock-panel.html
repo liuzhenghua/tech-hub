@@ -1,0 +1,49 @@
+<div class="utility-columns">
+  <section class="editor">
+    <div class="editor-head"><h2>持仓信息</h2></div>
+    <div class="utility-form">
+      <label for="stock-amount">投入金额（元）</label>
+      <input
+        id="stock-amount"
+        type="number"
+        inputmode="decimal"
+        min="0"
+        step="any"
+        placeholder="例如 10000"
+      />
+      <label for="stock-buy">买入价（元 / 股）</label>
+      <input
+        id="stock-buy"
+        type="number"
+        inputmode="decimal"
+        min="0"
+        step="any"
+        placeholder="例如 22.75"
+      />
+      <label for="stock-current">当前价（元 / 股）</label>
+      <input
+        id="stock-current"
+        type="number"
+        inputmode="decimal"
+        min="0"
+        step="any"
+        placeholder="例如 23.26"
+      />
+    </div>
+  </section>
+  <section class="editor">
+    <div class="editor-head"><h2>估算结果</h2></div>
+    <div class="utility-form" aria-live="polite">
+      <span class="utility-meta" id="stock-rate-label">涨跌幅</span>
+      <output id="stock-rate" aria-labelledby="stock-rate-label">—</output>
+      <span class="utility-meta" id="stock-profit-label">浮动盈亏</span>
+      <output id="stock-profit" aria-labelledby="stock-profit-label">—</output>
+      <span class="utility-meta" id="stock-value-label">当前市值</span>
+      <output id="stock-value" aria-labelledby="stock-value-label">—</output>
+      <p class="utility-hint">
+        按投入金额全部买入估算，未计交易费用或整股限制。
+      </p>
+    </div>
+  </section>
+</div>
+<p id="stock-status" class="utility-status" role="status"></p>
