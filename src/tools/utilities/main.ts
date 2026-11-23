@@ -1,13 +1,11 @@
 import { mountTime } from './time-panel';
 import { mountDiff } from './diff-panel';
 import { mountRegex } from './regex-panel';
-import { mountStock } from './stock-panel';
 import { recordUsage } from '../../tool-usage';
 const tools = {
   timestamp: { title: '时间戳转换', mount: mountTime },
   diff: { title: '文本 / JSON 对比', mount: mountDiff },
   regex: { title: '正则表达式测试', mount: mountRegex },
-  stock: { title: '股票盈亏计算', mount: mountStock },
 };
 const root = document.querySelector<HTMLElement>('#utility-panel')!;
 const events = new AbortController();

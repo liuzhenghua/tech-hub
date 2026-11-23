@@ -578,29 +578,3 @@
   color: #174c2c;
   border-radius: 2px;
 }
-
-.utility-form output {
-  font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
-}
-
-.stock-record {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-}
-.stock-record > :first-child {
-  flex: 1;
-  min-width: 0;
-  text-align: left;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-.stock-record > :last-child {
-  flex: none;
-}
-
-.utility-page main:has(#stock-records) {
-  height: auto;
-  min-height: 100dvh;
-}

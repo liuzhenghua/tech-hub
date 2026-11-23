@@ -15,7 +15,6 @@ export const toolIds = [
   'timestamp',
   'diff',
   'regex',
-  'stock',
   'lan-transfer',
 ] as const;
 export type ToolId = (typeof toolIds)[number];
