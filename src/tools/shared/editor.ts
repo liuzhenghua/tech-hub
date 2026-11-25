@@ -12,6 +12,7 @@ import { mountOptionTabs } from './option-tabs';
 export function mountEditor(
   root: HTMLElement,
   tool: ToolDefinition,
+  storageId = tool.id,
 ): () => void {
   function element<T extends HTMLElement>(id: string): T {
     const node = root.querySelector<HTMLElement>('#' + id);
@@ -24,12 +25,12 @@ export function mountEditor(
     variant = element<HTMLSelectElement>('crypto-variant');
   const preview = element<HTMLDivElement>('markdown-preview'),
     tree = element<HTMLDivElement>('json-tree');
-  let saved = readState(tool.id);
+  let saved = readState(storageId);
   if (tool.separateOptionState) {
     const selected = tool.options.includes(saved.option || '')
       ? saved.option!
       : tool.options[0];
-    const optionState = readState(`${tool.id}-${selected}`);
+    const optionState = readState(`${storageId}-${selected}`);
     if (optionState.input !== undefined || saved.option !== selected)
       saved = { ...optionState, option: selected };
   }
@@ -81,10 +82,10 @@ export function mountEditor(
       source,
       wrap,
     };
-    const success = writeState(tool.id, state);
+    const success = writeState(storageId, state);
     const optionSaved =
       !tool.separateOptionState ||
-      writeState(`${tool.id}-${option.value}`, state);
+      writeState(`${storageId}-${option.value}`, state);
     element('storage-note').textContent =
       success && optionSaved
         ? '内容自动保存在本机'
@@ -342,7 +343,7 @@ export function mountEditor(
     view();
   });
   function restoreOptionState() {
-    const state = readState(`${tool.id}-${option.value}`);
+    const state = readState(`${storageId}-${option.value}`);
     input.value = state.input || '';
     output.value = state.output || '';
     wrap = state.wrap !== false;

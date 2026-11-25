@@ -1,0 +1,11 @@
+.editor-draft-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.editor-draft-selector button[aria-pressed='false'] {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--muted);
+}

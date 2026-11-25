@@ -1,4 +1,5 @@
-import { mountEditorPanel } from './shared/editor-panel';
+import { mountEditorDrafts } from './editor-drafts';
+import './editor-drafts.css';
 import { tool as jsonTool } from './json/tool';
 import { tool as stringsTool } from './strings/tool';
 import { mountClipboard } from './clipboard/panel';
@@ -13,11 +14,11 @@ export function mountWorkspace(root: HTMLElement): () => void {
     {
       json: {
         title: jsonTool.title,
-        mount: (root) => mountEditorPanel(root, jsonTool),
+        mount: (root) => mountEditorDrafts(root, jsonTool, 'JSON'),
       },
       strings: {
         title: stringsTool.title,
-        mount: (root) => mountEditorPanel(root, stringsTool),
+        mount: (root) => mountEditorDrafts(root, stringsTool),
       },
       clipboard: { title: '剪贴板', mount: mountClipboard },
     },

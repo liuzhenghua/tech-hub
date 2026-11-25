@@ -6,6 +6,7 @@ import type { ToolDefinition } from './types';
 export function mountEditorPanel(
   root: HTMLElement,
   tool: ToolDefinition,
+  storageId = tool.id,
 ): () => void {
   root.innerHTML = markup;
   const input = root.querySelector<HTMLTextAreaElement>('#input')!;
@@ -14,7 +15,7 @@ export function mountEditorPanel(
   input.placeholder = tool.inputPlaceholder || '输入需要处理的文本…';
   root.querySelector<HTMLTextAreaElement>('#output')!.placeholder =
     tool.outputPlaceholder || '处理结果会显示在这里';
-  const disposeEditor = mountEditor(root, tool);
+  const disposeEditor = mountEditor(root, tool, storageId);
   const disposeControls = mountResultControls(root, tool.id !== 'json');
   return () => {
     disposeControls();
